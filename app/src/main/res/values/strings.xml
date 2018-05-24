@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">GeomHelper</string>
+    <string name="settings">Настройки</string>
+    <string name="leaderboard">Лидеры</string>
+    <string name="profile">Профиль</string>
+    <string name="courses">Курсы</string>
+    <string name="tests">Тесты</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ProfileImage">Profile Image</string>
+    <string name="title_activity_login">Добро пожаловать</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="SignIn">Войти</string>
+    <string name="SignUp">Зарегистрироваться</string>
+    <string name="Password">Password</string>
+    <string name="Name">Имя</string>
+    <string name="Error">Случилась непридведенная ошибка</string>
+    <string name="_7"><![CDATA[< < - - - - - - 7 класс - - - - - - > >]]></string>
+    <string name="_8"><![CDATA[< < - - - - - - 8 класс - - - - - - > >]]></string>
+    <string name="_9"><![CDATA[< < - - - - - - 9 класс - - - - - - > >]]></string>
+    <string name="test_1">Начальные геометрические сведения</string>
+    <string name="test_2">Треугольники</string>
+    <string name="test_3">Параллельные прямые</string>
+    <string name="test_4">Соотношения между сторонами и углами ▲</string>
+    <string name="email">Email</string>
+    <string name="name_or_nickname">Имя или ник</string>
+    <string name="title_activity_sign_up">Sign Up</string>
+    <string name="not_register"><u>Еще не зарегестрированы?</u></string>
+    <string name="testname">TestName</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="search_icon">Search icon</string>
+    <string name="search">Поиск темы</string>
+    <string name="testimage">TestImage</string>
+    <string name="start_2">start_2</string>
+    <string name="start_1">start_1</string>
+    <string name="start">start</string>
+    <string name="welcome">Добро пожаловать!</string>
+    <string name="learn_new">Узнать новое</string>
+    <string name="practise_new">Закрепить старое</string>
+    <string name="lets_begin">Давайте начнем</string>
+    <string name="success">И добиться успеха</string>
+    <string name="begin">Начните, чтобы</string>
+    <string name="social">vk</string>
+    <string name="facebook_app_id">227878137947449</string>
+    <string name="fb_login_protocol_scheme">fb227878137947449</string>
+    <string name="server_client_id">1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com</string>
+    <string name="task_1">Задание 1</string>
+    <string name="choose">Какое-то там задание на выбор ванианта ответа</string>
+    <string name="_1">Вариант 1</string>
+    <string name="_2">Вариант 2</string>
+    <string name="_3">Вариант 3</string>
+    <string name="cont">Продолжить</string>
+    <string name="task2">Задание 2</string>
+    <string name="c">Какое-то там задание c простыми теоремами и вычислениями</string>
+    <string name="answer">Ответ</string>
+    <string name="task3">Задание 3</string>
+    <string name="paint">Какое-то там задание, которое надо будет нарисовать(вместо картинки должно быть поле рисования)</string>
+    <string name="end">Закончить</string>
+    <string name="results">Тест завершен!</string>
+    <string name="correct">correct</string>
+    <string name="soc">social</string>
+    <string name="type_pass">Действующий пароль</string>
+    <string name="new_email">Новый Email</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="check_password">Повторите новый пароль</string>
+    <integer name="com_vk_sdk_AppId">6314062</integer>
+
+</resources>

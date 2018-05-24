@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#c9000000</color>
+    <color name="colorAccent">#00bfff</color>
+    <color name="colorButton">#fbbe18</color>
+    <color name="white">#ffffff</color>
+    <color name="dark">#000000</color>
+    <color name="reg_btn_col">#29b297</color>
+    <color name="leaderboard">#607D8B</color>
+    <color name="leaderboardD">#5a7583</color>
+    <color name="profile">#E64A19</color>
+    <color name="profileD">#d24417</color>
+    <color name="settings">#2e7d32</color>
+    <color name="settingsD">#348338</color>
+    <color name="courses">#009688</color>
+    <color name="coursesD">#00877b</color>
+    <color name="tests">#1f298c</color>
+    <color name="testsD">#3d4eae</color>
+    <color name="text_color">#263238</color>
+    <color name="text_color_search">#ffffff</color>
+    <color name="background_color">#ffffff</color>
+    <color name="background_color_search">#e6000000</color>
+    <color name="gold">#FFD700</color>
+    <color name="silver">#c6ccd2</color>
+    <color name="bronze">#f6a120</color>
+    <color name="gray_50">#ffffff</color>
+    <color name="gray_300">#5be0e0e0</color>
+
+</resources>

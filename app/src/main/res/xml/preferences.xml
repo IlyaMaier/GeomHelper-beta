@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Профиль">
+
+        <EditTextPreference
+            android:inputType="textPersonName"
+            android:key="name"
+            android:summary="Измените ваше имя"
+            android:title="Имя" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Ночной режим">
+
+        <ListPreference
+            android:defaultValue="3"
+            android:dialogTitle="Ночной режим"
+            android:entries="@array/day_night"
+            android:entryValues="@array/day_night"
+            android:key="pref_day_night"
+            android:summary="Настройте внешний вид приложения"
+            android:title="Ночной режим" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Аккаунт">
+
+        <Preference
+            android:key = "acc"
+            android:title="Выйти из аккаунта"/>
+
+        <Preference
+            android:key="email"
+            android:title="Сменить Email" />
+
+        <Preference
+            android:key = "password"
+            android:title="Сменить пароль"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Прочее">
+
+        <Preference
+            android:key="share"
+            android:title="Поделиться" />
+
+        <Preference
+            android:key="news"
+            android:title="Что нового" />
+
+        <Preference
+            android:key="about_authors"
+            android:title="Об авторах" />
+
+        <Preference
+            android:key="about"
+            android:title="О приложении" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
