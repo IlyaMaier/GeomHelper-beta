@@ -117,7 +117,7 @@ public class FragmentCourses extends Fragment {
 
         final Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
 
-        floatingActionButton = rootView.findViewById(R.id.floatingActionButton);
+        floatingActionButton = rootView.findViewById(R.id.fab_courses);
         floatingActionButton.startAnimation(animation);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,16 +178,14 @@ public class FragmentCourses extends Fragment {
             @Override
             public void onClick(View v) {
                 String theme = et.getText().toString().toLowerCase();
-                if (!themesAll.contains(theme))
+                int p = searchP(theme);
+                int all = searchAll(theme);
+
+                if (all == -1)
                     Toast.makeText(getContext(),
                             "Такой темы не существует.",
                             Toast.LENGTH_SHORT).show();
-                else if (themesP.contains(theme)) {
-                    recyclerView.smoothScrollToPosition(
-                            adapterCourses.items.indexOf(
-                                    Person.courses.get(
-                                            shortsP.get(
-                                                    themesP.indexOf(theme)))));
+                else if (p != -1) {
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(
                                     Context.INPUT_METHOD_SERVICE);
@@ -198,11 +196,9 @@ public class FragmentCourses extends Fragment {
                         async.cancel(true);
                     async = null;
                     h = false;
-                    Person.currentCourse = Person.courses.get(
-                            shortsP.get(
-                                    themesP.indexOf(theme)));
+                    Person.currentCourse = Person.courses.get(shortsP.get(p));
                     for (int i = 0; i < Person.currentCourse.getNumberOfThemes(); i++) {
-                        if (Person.currentCourse.getTheme(i).toLowerCase().equals(theme))
+                        if (Person.currentCourse.getTheme(i).toLowerCase().equals(themesP.get(p)))
                             Person.currentTheme = i;
                     }
                     MainActivity.back = 2;
@@ -215,14 +211,13 @@ public class FragmentCourses extends Fragment {
                     FragmentCourseText fragmentCourseText = new FragmentCourseText();
                     fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
                     fragmentTransaction.commit();
-                } else if (themesAll.contains(theme)) {
+                } else {
                     Intent i = new Intent(getContext(), AddCourseActivity.class);
                     startActivityForResult(i, 10);
                     Toast.makeText(getContext(),
                             "Добавьте курс  \"" +
                                     courses.get(
-                                            shortsAll.get(
-                                                    themesAll.indexOf(theme)))
+                                            shortsAll.get(all))
                                             .getCourseName() + "\".",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -384,7 +379,7 @@ public class FragmentCourses extends Fragment {
                                 adapterCourses.notifyDataSetChanged();
                                 floatingActionButton.show();
                                 Person.c = Person.c.replace(
-                                        Person.c.charAt(Person.c.length() - position-1)
+                                        Person.c.charAt(Person.c.length() - position - 1)
                                                 + "", "");
                                 System.out.println(courses.indexOf(course));
                                 if (!j) {
@@ -471,6 +466,22 @@ public class FragmentCourses extends Fragment {
             h = false;
             cancel(true);
         }
+    }
+
+    private int searchP(String theme) {
+        for (int i = 0; i < themesP.size(); i++) {
+            if (themesP.get(i).contains(theme))
+                return i;
+        }
+        return -1;
+    }
+
+    private int searchAll(String theme) {
+        for (int i = 0; i < themesAll.size(); i++) {
+            if (themesAll.get(i).contains(theme))
+                return i;
+        }
+        return -1;
     }
 
 }

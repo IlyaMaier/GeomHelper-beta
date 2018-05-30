@@ -243,6 +243,8 @@ public class FragmentSettings extends PreferenceFragmentCompat
                         Person.experience = 0;
                         Person.leaderBoardPlace = 0;
                         Person.c = "";
+                        Person.currentTest = 0;
+                        Person.currentTestTheme = 0;
 
                         pref.edit().putString("tests", "").putString("pref_day_night", "Выключен").apply();
 

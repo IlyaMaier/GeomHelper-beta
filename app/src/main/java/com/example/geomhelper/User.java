@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class User  {
 
-    public static final String URL = "http://217.114.236.76:8080";
+    public static final String URL = "http://213.191.1.142:8080";
 
     int id;
     String name;

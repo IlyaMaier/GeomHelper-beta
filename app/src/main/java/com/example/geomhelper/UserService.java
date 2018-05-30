@@ -1,15 +1,11 @@
 package com.example.geomhelper;
 
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.Part;
-import retrofit2.http.Query;
 
 public interface UserService {
 
@@ -38,15 +34,6 @@ public interface UserService {
 
     @GET("/getLeaders")
     Call<String> getLeaders();
-
-    @GET("/getImage")
-    Call<String> downloadimage(@Query("id") String id);
-
-    @Multipart
-    @POST("/setUserImage")
-    Call<String> upload(
-            @Part("id") RequestBody id,
-            @Part("file") RequestBody file);
 
     @FormUrlEncoded
     @PUT("/changeEmail")

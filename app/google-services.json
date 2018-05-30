@@ -15,12 +15,20 @@
       },
       "oauth_client": [
         {
+          "client_id": "1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
           "client_id": "1021657095056-hmeqr1olb3ebtqq2c8qgtddmpu4cqhet.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.geomhelper",
             "certificate_hash": "daba35c9014652db8f96d2781302f11e14791fbb"
           }
+        },
+        {
+          "client_id": "1021657095056-7p6djmpicsvroicqdiogsqjpqfbbj3vm.apps.googleusercontent.com",
+          "client_type": 3
         },
         {
           "client_id": "1021657095056-7p6djmpicsvroicqdiogsqjpqfbbj3vm.apps.googleusercontent.com",
@@ -40,7 +48,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "1021657095056-7p6djmpicsvroicqdiogsqjpqfbbj3vm.apps.googleusercontent.com",
+              "client_id": "1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

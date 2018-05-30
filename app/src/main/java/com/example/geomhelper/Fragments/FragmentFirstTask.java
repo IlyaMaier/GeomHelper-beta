@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.example.geomhelper.Fragments.FragmentResult.answer1;
+import static com.example.geomhelper.Fragments.FragmentTests.fab;
 import static com.example.geomhelper.Person.pref;
 import static com.example.geomhelper.Person.task;
 
@@ -43,6 +44,7 @@ public class FragmentFirstTask extends Fragment {
     List<FirstTask> firstTasks;
     FirstTask firstTask;
     boolean t = true;
+    static int fabTest = 0, fabTheme = 0, fabStage = 0;
 
     @Nullable
     @Override
@@ -76,29 +78,33 @@ public class FragmentFirstTask extends Fragment {
     void initializeTests() {
         tests = new Tests().getCurrentTests();
 
-        firstTasks = new FirstTasks().getTasks(Person.currentTest, Person.currentTestTheme);
-        TestJSON testJSON = new Gson().fromJson(
-                pref.getString("tests", null), TestJSON.class);
-        if (testJSON == null) {
-            testJSON = new TestJSON();
-            testJSON.setTest(Person.currentTest, Person.currentTestTheme, 0);
-        } else {
-            try {
-                task = testJSON.getTest(Person.currentTest, Person.currentTestTheme);
-            }catch (Exception e){
+        if (fab)
+            firstTask = new FirstTasks().getTasks(tests.size() - 1 - fabTest, fabTheme).get(fabStage);
+        else {
+            firstTasks = new FirstTasks().getTasks(Person.currentTest, Person.currentTestTheme);
+            TestJSON testJSON = new Gson().fromJson(
+                    pref.getString("tests", null), TestJSON.class);
+            if (testJSON == null) {
                 testJSON = new TestJSON();
                 testJSON.setTest(Person.currentTest, Person.currentTestTheme, 0);
+            } else {
+                try {
+                    task = testJSON.getTest(Person.currentTest, Person.currentTestTheme);
+                } catch (Exception e) {
+                    testJSON = new TestJSON();
+                    testJSON.setTest(Person.currentTest, Person.currentTestTheme, 0);
+                }
             }
-        }
 
-        ArrayList<FirstTask> firstTasks = new FirstTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        if (firstTasks.size() == 0||task==firstTasks.size()) {
-            t = false;
-            Toast.makeText(getContext(), "Тесты по данной теме закончились или недоступны",
-                    Toast.LENGTH_SHORT).show();
-            close();
-        } else firstTask = firstTasks.get(task);
+            ArrayList<FirstTask> firstTasks = new FirstTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            if (firstTasks.size() == 0 || task == firstTasks.size()) {
+                t = false;
+                Toast.makeText(getContext(), "Тесты по данной теме закончились или недоступны",
+                        Toast.LENGTH_SHORT).show();
+                close();
+            } else firstTask = firstTasks.get(task);
+        }
     }
 
     void initializeViews(View rootView) {

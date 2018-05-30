@@ -1,12 +1,9 @@
 package com.example.geomhelper.Activities;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +41,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
@@ -54,13 +54,11 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-import com.vk.sdk.util.VKUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -209,7 +207,6 @@ public class LoginActivity extends AppCompatActivity
         progressDialog.show();
     }
 
-    @SuppressLint("StaticFieldLeak")
     void signIn() {
         if (validateForm()) {
             userService.login(mEmail.getText().toString(),
@@ -244,46 +241,22 @@ public class LoginActivity extends AppCompatActivity
                                     Person.c = user.getCourses();
                                     tests = user.getTests();
 
-                                    Retrofit retrofit = new Retrofit.Builder()
-                                            .baseUrl(User.URL)
-                                            .addConverterFactory(ScalarsConverterFactory.create())
-                                            .build();
-
-                                    UserService userService = retrofit.create(UserService.class);
-                                    userService.downloadimage(Person.id).enqueue(new Callback<String>() {
-                                        @Override
-                                        public void onResponse(@NonNull Call<String> call,
-                                                               @NonNull Response<String> response) {
-                                            try {
-                                                String[] strings = Objects.requireNonNull(response.body()).split(",");
-                                                byte[] w = new byte[strings.length];
-                                                for (int i = 0; i < w.length; i++)
-                                                    w[i] = Byte.parseByte(strings[i]);
-
-                                                Bitmap bitmap = BitmapFactory.decodeByteArray(w, 0, w.length);
-                                                try {
-                                                    File file = new File(getApplicationContext().getFilesDir(), "profileImage.png");
-                                                    FileOutputStream fos = null;
-                                                    try {
-                                                        fos = new FileOutputStream(file);
-                                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                                                    } finally {
-                                                        if (fos != null) fos.close();
-                                                    }
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            } catch (NullPointerException e) {
-                                                e.printStackTrace();
+                                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                                    try {
+                                        StorageReference profileRef = mStorageRef.child(Person.id);
+                                        File file = new File(getFilesDir(),
+                                                "profileImage.png");
+                                        profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception exception) {
+                                                Toast.makeText(getApplicationContext(),
+                                                        "Не удалось загрузить изображение",
+                                                        Toast.LENGTH_SHORT).show();
                                             }
-                                        }
-
-                                        @Override
-                                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                            Toast.makeText(LoginActivity.this,
-                                                    "Не удалось загрузить изображение", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+                                        });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
 
                                     List<Course> courses = new Courses().getCurrentCourses();
                                     if (Person.c != null && !Person.c.isEmpty())
@@ -327,7 +300,7 @@ public class LoginActivity extends AppCompatActivity
 
         CharSequence text;
         if (Person.name != null)
-            text = "Добро пожаловать , " + Person.name + "!";
+            text = "Добро пожаловать, " + Person.name + "!";
         else text = "Добро пожаловать!";
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
         progressDialog.cancel();

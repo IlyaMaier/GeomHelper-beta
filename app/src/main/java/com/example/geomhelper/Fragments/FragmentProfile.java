@@ -31,6 +31,12 @@ import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
 import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -84,6 +90,7 @@ public class FragmentProfile extends Fragment {
                     .into(circleImageView);
             new Async().execute();
         }
+
         textName.setText(Person.name);
         textLevelName.setText(Person.currentLevel);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
@@ -211,6 +218,19 @@ public class FragmentProfile extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                    Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getContext()).getFilesDir(),
+                            "profileImage.png"));
+                    StorageReference profileRef = mStorageRef.child(Person.id);
+                    profileRef.putFile(file1)
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    Toast.makeText(getContext(),
+                                            "Не удалось загрузить изображение",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 }
         }
     }
@@ -242,11 +262,65 @@ public class FragmentProfile extends Fragment {
                         }
                     }
                 }
+                if (social) {
+                    try {
+                        StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                        Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getContext()).getFilesDir(),
+                                "profileImage.png"));
+                        StorageReference profileRef = mStorageRef.child(Person.id);
+                        profileRef.putFile(file1)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        Toast.makeText(getContext(),
+                                                "Не удалось загрузить изображение",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                        d = false;
+                                    }
+                                });
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                    d = true;
+                    new Async1().execute();
+                }
                 social = false;
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             return null;
+        }
+    }
+
+    class Async1 extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            while (d) {
+            }
+            publishProgress();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            try {
+                try {
+                    bitmap = BitmapFactory.decodeFile(
+                            context.getFilesDir() +
+                                    "/profileImage.png");
+
+                    circleImageView.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
     }
 

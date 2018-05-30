@@ -28,6 +28,9 @@ import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
 import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,8 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -189,20 +190,19 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                                     Person.id = response.body();
                                     Person.name = mName.getText().toString();
 
-                                    File imgFile = new File(getFilesDir(), "profileImage.png");
-                                    RequestBody requestBodyFile = RequestBody.create(MediaType.parse("image/*"), imgFile);
-                                    RequestBody requestBodyID = RequestBody.create(MediaType.parse("text/plain"), Person.id);
-                                    userService.upload(requestBodyID, requestBodyFile).enqueue(new Callback<String>() {
-                                        @Override
-                                        public void onResponse(Call<String> call, Response<String> response) {
-                                            System.out.println(response.body());
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<String> call, Throwable t) {
-                                            System.out.println(t.getMessage());
-                                        }
-                                    });
+                                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                                    Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getApplicationContext()).getFilesDir(),
+                                            "profileImage.png"));
+                                    StorageReference profileRef = mStorageRef.child(Person.id);
+                                    profileRef.putFile(file1)
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception exception) {
+                                                    Toast.makeText(getApplicationContext(),
+                                                            "Не удалось загрузить изображение",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
 
                                     SharedPreferences mSettings = getSharedPreferences(
                                             Person.APP_PREFERENCES, Context.MODE_PRIVATE);

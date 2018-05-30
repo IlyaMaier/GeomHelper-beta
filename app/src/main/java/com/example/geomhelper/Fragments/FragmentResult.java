@@ -1,7 +1,6 @@
 package com.example.geomhelper.Fragments;
 
 import android.os.Bundle;
-
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -41,6 +40,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+import static com.example.geomhelper.Fragments.FragmentTests.fab;
 import static com.example.geomhelper.Person.pref;
 import static com.example.geomhelper.Person.task;
 
@@ -87,12 +87,15 @@ public class FragmentResult extends Fragment {
         answer = new StringBuilder("Правильные ответы : ");
         for (int i = 0; i < thirdTask.getAnswer().length; i++)
             answer.append(thirdTask.getAnswer()[i]).append(", ");
+        answer.replace(answer.length() - 2, answer.length() - 1, " ");
         textView.setText(answer.toString());
 
         if (firstTask.getCorrectAnswer() == answer1) {
             ImageView imageView = card1.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.correct);
-            xp += 3;
+            if (fab)
+                xp += 1;
+            else xp += 2;
         } else if (answer1 == -1) {
             ImageView imageView = card1.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.unchecked);
@@ -103,7 +106,9 @@ public class FragmentResult extends Fragment {
         if (secondTask.getAnswer().equals(answer2)) {
             ImageView imageView = card2.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.correct);
-            xp += 6;
+            if (fab)
+                xp += 2;
+            else xp += 4;
         } else if (answer2.equals("")) {
             ImageView imageView = card2.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.unchecked);
@@ -116,8 +121,10 @@ public class FragmentResult extends Fragment {
                 && thirdTask.getAnswer()[2].equals(answers3[2])) {
             ImageView imageView = card3.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.correct);
-            xp += 6;
-        } else if (answers3[0].equals("")||answers3[1].equals("")||answers3[2].equals("")) {
+            if (fab)
+                xp += 3;
+            else xp += 6;
+        } else if (answers3[0].equals("") || answers3[1].equals("") || answers3[2].equals("")) {
             ImageView imageView = card3.findViewById(R.id.image_result);
             imageView.setBackgroundResource(R.drawable.unchecked);
         } else {
@@ -143,75 +150,84 @@ public class FragmentResult extends Fragment {
         TextView textXP = rootView.findViewById(R.id.experience);
         String t = "+" + xp + "xp";
         textXP.setText(t);
+        Person.experience += xp;
+        Person.currentLevel = new Levels().getLevel(Person.experience);
+        Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(User.URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+
+        try {
+            UserService userService = retrofit.create(UserService.class);
+            userService.updateUser(Person.id, "experience", String.valueOf(Person.experience))
+                    .enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Toast.makeText(getContext(),
+                                    "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } catch (NullPointerException e) {
+            Toast.makeText(getContext(),
+                    "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+
+        if (xp > 0 && !fab) {
+            TestJSON testJSON = new Gson().fromJson(
+                    pref.getString("tests", null), TestJSON.class);
+            if (testJSON == null) testJSON = new TestJSON();
+            testJSON.setTest(Person.currentTest, Person.currentTestTheme, task + 1);
+            pref.edit().putString("tests", new Gson().toJson(testJSON, TestJSON.class)).apply();
+            try {
+                UserService userService = retrofit.create(UserService.class);
+                userService.updateUser(Person.id, "tests", new Gson().toJson(testJSON, TestJSON.class))
+                        .enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                Toast.makeText(getContext(),
+                                        "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            } catch (NullPointerException e) {
+                Toast.makeText(getContext(),
+                        "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        }
 
         rootView.findViewById(R.id.button_close).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Person.experience += xp;
-                Person.currentLevel = new Levels().getLevel(Person.experience);
-                Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
-
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(User.URL)
-                        .addConverterFactory(ScalarsConverterFactory.create())
-                        .build();
-
-                try {
-                    UserService userService = retrofit.create(UserService.class);
-                    userService.updateUser(Person.id, "experience", String.valueOf(Person.experience))
-                            .enqueue(new Callback<String>() {
-                                @Override
-                                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-
-                                }
-
-                                @Override
-                                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                    Toast.makeText(getContext(),
-                                            "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                } catch (NullPointerException e) {
-                    Toast.makeText(getContext(),
-                            "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+                if (fab) {
+                    MainActivity.back = 0;
+                    Person.backTests = 0;
+                    FragmentTransaction fragmentTransaction = Objects.requireNonNull(
+                            getFragmentManager()).beginTransaction();
+                    FragmentTests fragmentTests = new FragmentTests();
+                    fragmentTransaction.replace(R.id.frame_tests, fragmentTests);
+                    fragmentTransaction.commit();
+                } else {
+                    MainActivity.back = 3;
+                    Person.backTests = 3;
+                    FragmentTransaction fragmentTransaction = Objects.requireNonNull(
+                            getFragmentManager()).beginTransaction();
+                    FragmentTestThemes fragmentTestThemes = new FragmentTestThemes();
+                    fragmentTransaction.replace(R.id.frame_tests, fragmentTestThemes);
+                    fragmentTransaction.commit();
                 }
-
-                if (xp > 0) {
-                    TestJSON testJSON = new Gson().fromJson(
-                            pref.getString("tests", null), TestJSON.class);
-                    if (testJSON == null) testJSON = new TestJSON();
-                    testJSON.setTest(Person.currentTest, Person.currentTestTheme, task + 1);
-                    pref.edit().putString("tests", new Gson().toJson(testJSON, TestJSON.class)).apply();
-                    try {
-                        UserService userService = retrofit.create(UserService.class);
-                        userService.updateUser(Person.id, "tests", new Gson().toJson(testJSON, TestJSON.class))
-                                .enqueue(new Callback<String>() {
-                                    @Override
-                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-
-                                    }
-
-                                    @Override
-                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                        Toast.makeText(getContext(),
-                                                "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                    } catch (NullPointerException e) {
-                        Toast.makeText(getContext(),
-                                "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
-                    }
-                }
-
-                MainActivity.back = 3;
-                Person.backTests = 3;
-                FragmentTransaction fragmentTransaction = Objects.requireNonNull(
-                        getFragmentManager()).beginTransaction();
-                FragmentTestThemes fragmentTestThemes = new FragmentTestThemes();
-                fragmentTransaction.replace(R.id.frame_tests, fragmentTestThemes);
-                fragmentTransaction.commit();
             }
         });
         return rootView;
@@ -220,17 +236,29 @@ public class FragmentResult extends Fragment {
     private void initializeTests() {
         List<Test> tests = new Tests().getCurrentTests();
 
-        ArrayList<FirstTask> firstTasks = new FirstTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        firstTask = firstTasks.get(task);
+        if (fab) {
+            firstTask = new FirstTasks().getTasks(tests.size() - 1 -
+                    FragmentFirstTask.fabTest, FragmentFirstTask.fabTheme)
+                    .get(FragmentFirstTask.fabStage);
+            secondTask = new SecondTasks().getTasks(tests.size() - 1 -
+                    FragmentSecondTask.fabTest, FragmentSecondTask.fabTheme)
+                    .get(FragmentSecondTask.fabStage);
+            thirdTask = new ThirdTasks().getTasks(tests.size() - 1 -
+                    FragmentThirdTask.fabTest, FragmentThirdTask.fabTheme)
+                    .get(FragmentThirdTask.fabStage);
+        } else {
+            ArrayList<FirstTask> firstTasks = new FirstTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            firstTask = firstTasks.get(task);
 
-        ArrayList<SecondTask> secondTasks = new SecondTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        secondTask = secondTasks.get(task);
+            ArrayList<SecondTask> secondTasks = new SecondTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            secondTask = secondTasks.get(task);
 
-        ArrayList<ThirdTask> thirdTasks = new ThirdTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        thirdTask = thirdTasks.get(task);
+            ArrayList<ThirdTask> thirdTasks = new ThirdTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            thirdTask = thirdTasks.get(task);
+        }
     }
 
 }

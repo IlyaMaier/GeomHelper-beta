@@ -1,7 +1,6 @@
 package com.example.geomhelper.Fragments;
 
 import android.os.Bundle;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.example.geomhelper.Fragments.FragmentResult.answers3;
+import static com.example.geomhelper.Fragments.FragmentTests.fab;
 import static com.example.geomhelper.Person.task;
 
 public class FragmentThirdTask extends Fragment {
@@ -35,6 +35,8 @@ public class FragmentThirdTask extends Fragment {
     private ImageView imageView3;
     private EditText editText31, editText32, editText33;
     private ThirdTask thirdTask;
+    static int fabTest = 0, fabTheme = 0, fabStage = 0;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -62,9 +64,14 @@ public class FragmentThirdTask extends Fragment {
 
     private void initializeTests() {
         List<Test> tests = new Tests().getCurrentTests();
-        ArrayList<ThirdTask> thirdTasks = new ThirdTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        thirdTask = thirdTasks.get(task);
+
+        if (fab)
+            thirdTask = new ThirdTasks().getTasks(tests.size() - 1 - fabTest, fabTheme).get(fabStage);
+        else {
+            ArrayList<ThirdTask> thirdTasks = new ThirdTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            thirdTask = thirdTasks.get(task);
+        }
     }
 
     private void initializeViews(View rootView) {
@@ -82,11 +89,11 @@ public class FragmentThirdTask extends Fragment {
     }
 
     private void setInfo() {
-            imageView3.setImageDrawable(getResources().
-                    getDrawable(thirdTask.getImgThirdTask()));
-            textViewT31.setText(thirdTask.getTextViewT31());
-            textViewT32.setText(thirdTask.getTextViewT32());
-            textViewT33.setText(thirdTask.getTextViewT33());
+        imageView3.setImageDrawable(getResources().
+                getDrawable(thirdTask.getImgThirdTask()));
+        textViewT31.setText(thirdTask.getTextViewT31());
+        textViewT32.setText(thirdTask.getTextViewT32());
+        textViewT33.setText(thirdTask.getTextViewT33());
     }
 
 }

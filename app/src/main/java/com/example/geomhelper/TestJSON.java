@@ -1,8 +1,6 @@
 package com.example.geomhelper;
 
 import android.annotation.SuppressLint;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,4 +25,11 @@ public class TestJSON {
         return tests.get(test).get(theme);
     }
 
+    public Map<Integer, Map<Integer, Integer>> getTests() {
+        return tests;
+    }
+
+    public Map<Integer, Integer> getTestsMap(int test) {
+        return tests.get(test);
+    }
 }

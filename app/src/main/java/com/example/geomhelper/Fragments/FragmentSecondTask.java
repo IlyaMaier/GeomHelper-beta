@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.example.geomhelper.Fragments.FragmentResult.answer2;
+import static com.example.geomhelper.Fragments.FragmentTests.fab;
 import static com.example.geomhelper.Person.task;
 
 public class FragmentSecondTask extends Fragment {
@@ -34,6 +35,7 @@ public class FragmentSecondTask extends Fragment {
     private EditText editText2Task;
     private Button buttonEnter2;
     private SecondTask secondTask;
+    static int fabTest = 0, fabTheme = 0, fabStage = 0;
 
     @Nullable
     @Override
@@ -60,9 +62,14 @@ public class FragmentSecondTask extends Fragment {
 
     private void initializeTests() {
         List<Test> tests = new Tests().getCurrentTests();
-        ArrayList<SecondTask> secondTasks = new SecondTasks().
-                getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        secondTask = secondTasks.get(task);
+
+        if (fab)
+            secondTask = new SecondTasks().getTasks(tests.size() - 1 - fabTest, fabTheme).get(fabStage);
+        else {
+            ArrayList<SecondTask> secondTasks = new SecondTasks().
+                    getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
+            secondTask = secondTasks.get(task);
+        }
     }
 
     private void initializeViews(View rootView) {

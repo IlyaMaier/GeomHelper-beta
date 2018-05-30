@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.RVLeaderboardAdapter;
@@ -88,10 +87,6 @@ public class FragmentLeaderboard extends Fragment {
 
                     @Override
                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            if (Objects.equals(response.body(), "0"))
-                                Toast.makeText(getContext(), "Не дуалось получить данные",
-                                        Toast.LENGTH_SHORT).show();
-                            else {
                                 result = response.body();
                                 result = Objects.requireNonNull(result).replace("[", "");
                                 result = result.replace("]", "");
@@ -114,13 +109,10 @@ public class FragmentLeaderboard extends Fragment {
                                 rvLeaderboardAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.INVISIBLE);
                                 recyclerView.setVisibility(View.VISIBLE);
-                            }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Не удалось получить данные",
-                                Toast.LENGTH_SHORT).show();
                     }
                 });
 
