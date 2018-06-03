@@ -23,7 +23,7 @@
             android:textColor="@color/text_color"
             android:textSize="30sp" />
 
-        <com.example.geomhelper.Resources.CircleImageView
+        <com.example.geomhelper.resources.CircleImageView
             android:id="@+id/image_profile_leaderboard"
             android:layout_width="60dp"
             android:layout_height="60dp"

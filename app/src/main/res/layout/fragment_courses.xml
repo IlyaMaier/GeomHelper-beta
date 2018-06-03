@@ -1,10 +1,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color"
-    tools:context="com.example.geomhelper.Fragments.FragmentCourses">
+    tools:context="com.example.geomhelper.fragments.FragmentCourses">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_courses"
@@ -20,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="10dp"
+        app:backgroundTint="#00c853"
         android:layout_marginEnd="16dp"
         android:src="@drawable/ic_add" />
 

@@ -10,7 +10,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.geomhelper.Activities.SignUp">
+    tools:context="com.example.geomhelper.activities.SignUp">
 
     <ScrollView
         android:id="@+id/sign_up_form"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.example.geomhelper.Resources.CircleImageView
+            <com.example.geomhelper.resources.CircleImageView
                 android:id="@+id/imageProfileSignUp"
                 android:layout_width="96dp"
                 android:layout_height="96dp"

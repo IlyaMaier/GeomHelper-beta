@@ -74,6 +74,10 @@
     <string name="new_email">Новый Email</string>
     <string name="new_password">Новый пароль</string>
     <string name="check_password">Повторите новый пароль</string>
+    <string name="teorems">Теоремы</string>
+    <string name="definitions">Термины</string>
+    <string name="achievements">Достижения</string>
+    <string name="theorem">теорема</string>
     <integer name="com_vk_sdk_AppId">6314062</integer>
 
 </resources>

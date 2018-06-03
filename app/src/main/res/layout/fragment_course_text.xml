@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_color"
     android:layout_margin="16dp"
-    tools:context="com.example.geomhelper.Fragments.FragmentCourseText">
+    tools:context="com.example.geomhelper.fragments.FragmentCourseText">
 
     <WebView
         android:id="@+id/web_fragment_course_text"

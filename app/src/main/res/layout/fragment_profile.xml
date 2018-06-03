@@ -1,47 +1,99 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scroll_profile"
+    android:id="@+id/frame_profile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.geomhelper.Fragments.FragmentProfile">
+    tools:context="com.example.geomhelper.fragments.FragmentProfile">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scroll_profile"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <com.example.geomhelper.Resources.CircleImageView
-            android:id="@+id/imageProfile"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/ProfileImage" />
-
-        <TextView
-            android:id="@+id/textName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/text_color"
-            android:textSize="30sp" />
+            android:layout_margin="16dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textLevelName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/text_color"
-            android:textSize="20sp" />
+            <com.example.geomhelper.resources.CircleImageView
+                android:id="@+id/imageProfile"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/ProfileImage" />
 
-        <TextView
-            android:id="@+id/textExperince"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/text_color"
-            android:textSize="15sp" />
+            <TextView
+                android:id="@+id/textName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_color"
+                android:textSize="30sp" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textLevelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_color"
+                android:textSize="20sp" />
 
-</ScrollView>
+            <TextView
+                android:id="@+id/textExperince"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_color"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/teorems"
+                    style="@style/Base.Widget.AppCompat.ButtonBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/btn_profile"
+                    android:text="@string/teorems"
+                    android:textColor="@color/text_color"
+                    android:textSize="20sp" />
+
+                <Button
+                    android:id="@+id/definitions"
+                    style="@style/Base.Widget.AppCompat.ButtonBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/btn_def"
+                    android:text="@string/definitions"
+                    android:textColor="@color/text_color"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/achievements"
+                style="@style/Base.Widget.AppCompat.ButtonBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/btn_achiev"
+                android:text="@string/achievements"
+                android:textColor="@color/text_color"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>

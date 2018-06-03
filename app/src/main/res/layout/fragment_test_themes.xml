@@ -3,7 +3,7 @@
     android:id="@+id/frameTestThemes"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.geomhelper.Fragments.FragmentTestThemes">
+    tools:context="com.example.geomhelper.fragments.FragmentTestThemes">
 
     <ScrollView
         android:layout_width="match_parent"
