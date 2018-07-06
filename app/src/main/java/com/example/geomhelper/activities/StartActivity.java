@@ -20,8 +20,6 @@ import com.example.geomhelper.fragments.FragmentStart4;
 import com.rd.PageIndicatorView;
 import com.rd.animation.type.AnimationType;
 
-import java.util.Objects;
-
 public class StartActivity extends AppCompatActivity {
 
     ViewPager viewPager;
@@ -33,9 +31,7 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         try {
-            //зачем ты оборачиваешь потенциальный код на NPE в requireNonNull
-            // чтобы не ругалась IDE? Ты посмотри что за код в этом методе? Шило на мыло
-            Objects.requireNonNull(getSupportActionBar()).hide();
+            getSupportActionBar().hide();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -52,6 +48,7 @@ public class StartActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(i);
+                finish();
             }
         });
 
@@ -101,11 +98,6 @@ public class StartActivity extends AppCompatActivity {
         public int getCount() {
             return 4;
         }
-
-    }
-
-    @Override
-    public void onBackPressed() {
 
     }
 

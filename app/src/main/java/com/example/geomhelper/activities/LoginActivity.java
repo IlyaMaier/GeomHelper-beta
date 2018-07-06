@@ -105,7 +105,8 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), SignUp.class);
-                startActivity(i);
+                startActivityForResult(i, 1234);
+                finish();
             }
         });
 
@@ -287,8 +288,6 @@ public class LoginActivity extends AppCompatActivity
 
         db.putString(COLUMN_UID, Person.uId);
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(i);
-        finish();
 
         CharSequence text;
         if (Person.name != null)
@@ -296,6 +295,9 @@ public class LoginActivity extends AppCompatActivity
         else text = getString(R.string.welcome2);
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
         progressDialog.cancel();
+
+        startActivity(i);
+        finish();
     }
 
     void signInWithFacebook() {
@@ -308,6 +310,8 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1234)
+            finish();
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
             public void onResult(final VKAccessToken res) {

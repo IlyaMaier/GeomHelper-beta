@@ -95,6 +95,7 @@ public class FragmentTests extends Fragment {
                     Toast.makeText(getContext(), R.string.you_havent_pass_tests,
                             Toast.LENGTH_SHORT).show();
                 } else {
+                    // if(testJSON.getTestsMap())
                     fab = true;
 
                     List<Test> tests = new Tests().getCurrentTests();

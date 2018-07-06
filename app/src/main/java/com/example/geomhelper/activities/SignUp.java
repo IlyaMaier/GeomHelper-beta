@@ -210,11 +210,11 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                                             .edit().putLong("id", Person.id).apply();
 
                                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(i);
-                                    finish();
                                     CharSequence text = getString(R.string.welcome1) + mName.getText() + "!";
                                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                                     progressDialog.cancel();
+                                    startActivity(i);
+                                    finish();
                                     break;
                             }
                             progressDialog.cancel();

@@ -112,7 +112,8 @@ public class MainActivity extends AppCompatActivity {
                 Context.MODE_PRIVATE).getLong("id", -1);
         if (Person.id == -1) {
             Intent i = new Intent(getApplicationContext(), StartActivity.class);
-            startActivity(i);
+            startActivityForResult(i, 1000);
+            finish();
         }
 
         db = new DB(getApplicationContext());
@@ -165,9 +166,6 @@ public class MainActivity extends AppCompatActivity {
                 if (!Person.courses.contains(courses.get(Integer.valueOf(Person.c.charAt(i) + ""))))
                     Person.courses.add(courses.get(Integer.valueOf(Person.c.charAt(i) + "")));
             }
-        } else {
-            Intent i = new Intent(getApplicationContext(), StartActivity.class);
-            startActivity(i);
         }
 
         viewPager = findViewById(R.id.pager);
