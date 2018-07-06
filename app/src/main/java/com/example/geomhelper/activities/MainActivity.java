@@ -59,6 +59,7 @@ import static com.example.geomhelper.sqlite.OpenHelper.NUM_SETTINGS;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int CODE_REQUEST = 1000;
     public static int back = 0;
     private BottomNavigationView bottomNavigationView;
     private ViewPager viewPager;
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 Context.MODE_PRIVATE).getLong("id", -1);
         if (Person.id == -1) {
             Intent i = new Intent(getApplicationContext(), StartActivity.class);
-            startActivityForResult(i, 1000);
+            startActivityForResult(i, CODE_REQUEST);
             finish();
         }
 

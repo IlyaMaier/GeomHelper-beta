@@ -84,6 +84,8 @@ public class LoginActivity extends AppCompatActivity
     private CallbackManager callbackManager;
     private ProgressDialog progressDialog;
 
+    public static final int CODE_REQUEST = 1234;
+
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -105,7 +107,7 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), SignUp.class);
-                startActivityForResult(i, 1234);
+                startActivityForResult(i, CODE_REQUEST);
                 finish();
             }
         });
