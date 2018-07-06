@@ -18,7 +18,7 @@
         android:title="Ночной режим">
 
         <ListPreference
-            android:defaultValue="3"
+            android:defaultValue="2"
             android:dialogTitle="Ночной режим"
             android:entries="@array/day_night"
             android:entryValues="@array/day_night"
@@ -30,19 +30,36 @@
 
     <PreferenceCategory
         android:textSize="30sp"
+        android:title="Лидеры">
+
+        <CheckBoxPreference
+            android:key="imageLeaders"
+            android:summary="Загружать картинки лидеров?"
+            android:title="Картинки" />
+
+        <EditTextPreference
+            android:inputType="number"
+            android:key="desc"
+            android:summary="Измените количество загружаемых лидеров"
+            android:title="Количество лидеров" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
         android:title="Аккаунт">
 
         <Preference
-            android:key = "acc"
-            android:title="Выйти из аккаунта"/>
+            android:key="acc"
+            android:title="Выйти из аккаунта" />
 
         <Preference
             android:key="email"
             android:title="Сменить Email" />
 
         <Preference
-            android:key = "password"
-            android:title="Сменить пароль"/>
+            android:key="password"
+            android:title="Сменить пароль" />
 
     </PreferenceCategory>
 

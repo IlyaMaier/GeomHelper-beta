@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +26,7 @@ import com.example.geomhelper.R;
 import com.example.geomhelper.resources.CircleImageView;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -43,6 +43,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_UID;
+
 public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     private EditText mEmail;
@@ -50,10 +52,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     private EditText mConfirm;
     private EditText mName;
     private CircleImageView circleImageView;
-    ProgressDialog progressDialog;
-    boolean a = false;
-    Retrofit retrofit;
-    UserService userService;
+    private ProgressDialog progressDialog;
+    private boolean a = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -101,30 +101,30 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
         String name = mName.getText().toString();
         if (TextUtils.isEmpty(name)) {
-            mName.setError("Заполните поле");
+            mName.setError(getString(R.string.fill_in));
             valid = false;
         }
 
         String email = mEmail.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            mEmail.setError("Заполните поле");
+            mEmail.setError(getString(R.string.fill_in));
             valid = false;
         }
 
         String password = mPassword.getText().toString();
 
         if (password.length() < 6) {
-            mPassword.setError("Пароль не может быть меньше 6 символов!");
+            mPassword.setError(getString(R.string.too_short_password));
             valid = false;
         }
 
         if (TextUtils.isEmpty(password)) {
-            mPassword.setError("Заполните поле");
+            mPassword.setError(getString(R.string.fill_in));
             valid = false;
         }
 
         if (!password.equals(mConfirm.getText().toString())) {
-            mConfirm.setError("Пароли не совпадают");
+            mConfirm.setError(getString(R.string.passwords_incorrect));
             valid = false;
         }
 
@@ -141,7 +141,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         if (v.getId() == R.id.sign_up) {
             if (!validateForm()) return;
 
-            progressDialog.setTitle("Загрузка...");
+            progressDialog.setTitle(getString(R.string.loading));
             progressDialog.show();
 
             if (!a) {
@@ -162,12 +162,12 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 }
             }
 
-            retrofit = new Retrofit.Builder()
+            Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(User.URL)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build();
 
-            userService = retrofit.create(UserService.class);
+            UserService userService = retrofit.create(UserService.class);
 
             userService.createUser(mEmail.getText().toString(),
                     User.md5(mPassword.getText().toString()),
@@ -177,44 +177,42 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             switch (Objects.requireNonNull(response.body())) {
                                 case "0":
-                                    Toast.makeText(SignUp.this, "Произошла ошибка!",
+                                    Toast.makeText(SignUp.this, R.string.error,
                                             Toast.LENGTH_SHORT).show();
                                     break;
                                 case "2":
                                     Toast.makeText(SignUp.this,
-                                            "Пользователь с таким email уже зарегестрирован!",
+                                            R.string.email_is_busy,
                                             Toast.LENGTH_SHORT).show();
                                     break;
                                 default:
-                                    Person.id = response.body();
+                                    Person.uId = response.body();
                                     Person.name = mName.getText().toString();
 
                                     StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                                     Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getApplicationContext()).getFilesDir(),
                                             "profileImage.png"));
-                                    StorageReference profileRef = mStorageRef.child(Person.id);
+                                    StorageReference profileRef = mStorageRef.child(Person.uId);
                                     profileRef.putFile(file1)
                                             .addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception exception) {
                                                     Toast.makeText(getApplicationContext(),
-                                                            "Не удалось загрузить изображение",
+                                                            getString(R.string.can_not_load_image),
                                                             Toast.LENGTH_SHORT).show();
                                                 }
                                             });
 
-                                    SharedPreferences mSettings = getSharedPreferences(
-                                            Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = mSettings.edit();
-                                    editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-                                    editor.putString(Person.APP_PREFERENCES_UID, Person.id);
-                                    editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-                                    editor.apply();
+                                    DB db = new DB(getApplicationContext());
+                                    db.putString(COLUMN_UID, Person.uId);
+                                    Person.id = db.signUp(Person.uId, Person.name, 1);
+                                    getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE)
+                                            .edit().putLong("id", Person.id).apply();
 
                                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(i);
                                     finish();
-                                    CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
+                                    CharSequence text = getString(R.string.welcome1) + mName.getText() + "!";
                                     Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                                     progressDialog.cancel();
                                     break;
@@ -224,7 +222,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Toast.makeText(getApplicationContext(), "Произошла ошибка.",
+                            Toast.makeText(getApplicationContext(), R.string.error,
                                     Toast.LENGTH_SHORT).show();
                             progressDialog.cancel();
                         }

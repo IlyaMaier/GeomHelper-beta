@@ -18,10 +18,11 @@ import android.webkit.WebView;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.activities.MainActivity;
+import com.example.geomhelper.sqlite.DB;
 
 import java.util.Objects;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_DAY_NIGHT;
 
 public class FragmentCourseText extends Fragment {
 
@@ -32,6 +33,7 @@ public class FragmentCourseText extends Fragment {
     private WebView webView;
     private int scrollDist = 0;
     private boolean isVisible = true;
+    private DB db;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -39,8 +41,10 @@ public class FragmentCourseText extends Fragment {
         View view = inflater.inflate(R.layout.fragment_course_text, container, false);
         view.setBackgroundColor(getResources().getColor(R.color.white));
 
+        db = new DB(getContext());
+
         webView = view.findViewById(R.id.web_fragment_course_text);
-        if (pref.getString("pref_day_night", "").equals("Включен")) {
+        if (db.getString(NUM_COLUMN_DAY_NIGHT).equals(getString(R.string.on))) {
             webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
             webView.setBackgroundColor(getResources().getColor(R.color.background_color));
             webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
@@ -104,7 +108,7 @@ public class FragmentCourseText extends Fragment {
                 } else {
                     floatingActionButton.setImageResource(R.drawable.ic_next);
                     Person.currentTheme--;
-                    if (pref.getString("pref_day_night", "").equals("Включен")) {
+                    if (db.getString(NUM_COLUMN_DAY_NIGHT).equals(getString(R.string.on))) {
                         webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
                         webView.setBackgroundColor(getResources().getColor(R.color.background_color));
                         webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
@@ -132,7 +136,7 @@ public class FragmentCourseText extends Fragment {
                     Person.backCourses = 1;
                 } else {
                     Person.currentTheme++;
-                    if (pref.getString("pref_day_night", "").equals("Включен")) {
+                    if (db.getString(NUM_COLUMN_DAY_NIGHT).equals(getString(R.string.on))) {
                         webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
                         webView.setBackgroundColor(getResources().getColor(R.color.background_color));
                         webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);

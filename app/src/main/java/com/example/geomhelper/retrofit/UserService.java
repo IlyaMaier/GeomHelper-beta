@@ -3,7 +3,6 @@ package com.example.geomhelper.retrofit;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 
@@ -32,8 +31,9 @@ public interface UserService {
                             @Field("param") String param,
                             @Field("value") String value);
 
-    @GET("/getLeaders")
-    Call<String> getLeaders();
+    @FormUrlEncoded
+    @PUT("/getLeaders")
+    Call<String> getLeaders(@Field("desc") int desc);
 
     @FormUrlEncoded
     @PUT("/changeEmail")

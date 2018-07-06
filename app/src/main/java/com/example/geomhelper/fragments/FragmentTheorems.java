@@ -37,19 +37,20 @@ import static com.example.geomhelper.activities.MainActivity.back;
 
 public class FragmentTheorems extends Fragment {
 
-    View view;
-    RecyclerView recyclerView;
-    RVAdapter rvAdapter;
-    List<String> themes, theorems, themes1, theorems1, forms, thems;
-    List<Integer> images, images1;
-    CardView card;
-    EditText et;
-    Theorems theoremsClass;
-    int height;
-    float y;
-    long millis;
-    int f = 7, t = 1;
-    boolean search = false, form = true, theme = false, def = false, s = false;
+    private RecyclerView recyclerView;
+    private RVAdapter rvAdapter;
+    private List<String> themes;
+    private List<String> theorems;
+    private List<String> themes1;
+    private List<String> theorems1;
+    private List<Integer> images, images1;
+    private CardView card;
+    private Theorems theoremsClass;
+    private int height;
+    private float y;
+    private long millis;
+    private int f = 7, t = 1;
+    private boolean search = false, form = true, theme = false, def = false, s = false;
     public static volatile boolean h = true;
 
     public FragmentTheorems() {
@@ -59,7 +60,7 @@ public class FragmentTheorems extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_theorems, container, false);
+        View view = inflater.inflate(R.layout.fragment_theorems, container, false);
 
         getThread().start();
 
@@ -71,8 +72,8 @@ public class FragmentTheorems extends Fragment {
         themes1 = new ArrayList<>();
         theorems1 = new ArrayList<>();
         images1 = new ArrayList<>();
-        forms = new ArrayList<>();
-        thems = new ArrayList<>();
+        List<String> forms = new ArrayList<>();
+        List<String> thems = new ArrayList<>();
 
         List<Course> courses = new Courses().getCurrentCourses();
         for (int i = 0; i < courses.size(); i++)
@@ -105,8 +106,8 @@ public class FragmentTheorems extends Fragment {
         frameLayout.addView(card, layoutParams);
         card.setTranslationY(-height);
 
-        et = view.findViewById(R.id.search);
-        et.setHint("Поиск теорем");
+        EditText et = view.findViewById(R.id.search);
+        et.setHint(R.string.search_theorems);
 
         final int finalHeight = height;
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
@@ -150,7 +151,6 @@ public class FragmentTheorems extends Fragment {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            final ArrayList<Integer> integers = new ArrayList<>();
                             for (int i = 0; i < themes.size(); i++) {
                                 if (themes.get(i).toLowerCase().contains(s.toString().toLowerCase())) {
                                     themes1.add(themes.get(i));

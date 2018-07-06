@@ -184,7 +184,7 @@ public class FragmentCourses extends Fragment {
 
                 if (all == -1)
                     Toast.makeText(getContext(),
-                            "Такой темы не существует.",
+                            R.string.wrong_theme,
                             Toast.LENGTH_SHORT).show();
                 else if (p != -1) {
                     InputMethodManager imm = (InputMethodManager)
@@ -216,7 +216,7 @@ public class FragmentCourses extends Fragment {
                     Intent i = new Intent(getContext(), AddCourseActivity.class);
                     startActivityForResult(i, 10);
                     Toast.makeText(getContext(),
-                            "Добавьте курс  \"" +
+                            getString(R.string.add_course) + "\"" +
                                     courses.get(
                                             shortsAll.get(all))
                                             .getCourseName() + "\".",
@@ -260,7 +260,8 @@ public class FragmentCourses extends Fragment {
 
         });
 
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
+        BottomNavigationView bottomNavigationView =
+                Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
@@ -326,8 +327,10 @@ public class FragmentCourses extends Fragment {
 
         @NonNull
         @Override
-        public RVAdapter.RecyclerViewCoursesHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_courses_card, parent, false);
+        public RVAdapter.RecyclerViewCoursesHolder onCreateViewHolder(
+                @NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_courses_card, parent, false);
             return new RecyclerViewCoursesHolder(v);
         }
 
@@ -386,9 +389,9 @@ public class FragmentCourses extends Fragment {
                     public boolean onLongClick(View view) {
                         AlertDialog.Builder ad;
                         ad = new AlertDialog.Builder(context);
-                        ad.setTitle("Удаление курса");
-                        ad.setMessage("Вы точно хотите удалить данный курс?");
-                        ad.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                        ad.setTitle(R.string.deleting_course);
+                        ad.setMessage(R.string.delete_course);
+                        ad.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int arg1) {
                                 Person.courses.remove(course);
                                 adapterCourses.setItems(Person.courses);
@@ -421,24 +424,24 @@ public class FragmentCourses extends Fragment {
                                         .addConverterFactory(ScalarsConverterFactory.create())
                                         .build();
                                 UserService userService = retrofit.create(UserService.class);
-                                userService.updateUser(Person.id, "courses", Person.c)
+                                userService.updateUser(Person.uId, "courses", Person.c)
                                         .enqueue(new Callback<String>() {
                                             @Override
                                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                                 if (Objects.requireNonNull(response.body()).equals("0"))
-                                                    Toast.makeText(context, "Не удалось отправить данные на сервер",
+                                                    Toast.makeText(context, R.string.can_not_send_data,
                                                             Toast.LENGTH_SHORT).show();
                                             }
 
                                             @Override
                                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                                Toast.makeText(context, "Не удалось отправить данные на сервер",
+                                                Toast.makeText(context, R.string.can_not_send_data,
                                                         Toast.LENGTH_SHORT).show();
                                             }
                                         });
                             }
                         });
-                        ad.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        ad.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int arg1) {
                                 dialog.cancel();
                             }

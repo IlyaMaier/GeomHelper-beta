@@ -23,32 +23,32 @@ import com.example.geomhelper.content.FirstTasks;
 import com.example.geomhelper.content.Test;
 import com.example.geomhelper.content.Tests;
 import com.example.geomhelper.retrofit.TestJSON;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.example.geomhelper.Person.pref;
 import static com.example.geomhelper.Person.task;
 import static com.example.geomhelper.fragments.FragmentResult.answer1;
 import static com.example.geomhelper.fragments.FragmentTests.fab;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_TESTS;
 
 public class FragmentFirstTask extends Fragment {
 
-    TextView textViewName1, textViewTask1;
-    ImageView imageView1;
-    RadioButton radioButton, radioButton1, radioButton2;
-    Button buttonEnter1;
-    List<Test> tests;
-    List<FirstTask> firstTasks;
-    FirstTask firstTask;
-    boolean t = true;
-    static int fabTest = 0, fabTheme = 0, fabStage = 0;
+    private TextView textViewTask1;
+    private ImageView imageView1;
+    private RadioButton radioButton, radioButton1, radioButton2;
+    private Button buttonEnter1;
+    private FirstTask firstTask;
+    private boolean t = true;
+    public static int fabTest = 0, fabTheme = 0, fabStage = 0;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_first_task, container, false);
 
         initializeTests();
@@ -76,14 +76,15 @@ public class FragmentFirstTask extends Fragment {
     }
 
     void initializeTests() {
-        tests = new Tests().getCurrentTests();
+        List<Test> tests = new Tests().getCurrentTests();
+
+        DB db = new DB(getContext());
 
         if (fab)
             firstTask = new FirstTasks().getTasks(tests.size() - 1 - fabTest, fabTheme).get(fabStage);
         else {
-            firstTasks = new FirstTasks().getTasks(Person.currentTest, Person.currentTestTheme);
             TestJSON testJSON = new Gson().fromJson(
-                    pref.getString("tests", null), TestJSON.class);
+                    db.getString(NUM_COLUMN_TESTS), TestJSON.class);
             if (testJSON == null) {
                 testJSON = new TestJSON();
                 testJSON.setTest(Person.currentTest, Person.currentTestTheme, 0);
@@ -100,7 +101,7 @@ public class FragmentFirstTask extends Fragment {
                     getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
             if (firstTasks.size() == 0 || task == firstTasks.size()) {
                 t = false;
-                Toast.makeText(getContext(), "Тесты по данной теме закончились или недоступны",
+                Toast.makeText(getContext(), R.string.tests_not_available,
                         Toast.LENGTH_SHORT).show();
                 close();
             } else firstTask = firstTasks.get(task);
@@ -108,7 +109,6 @@ public class FragmentFirstTask extends Fragment {
     }
 
     void initializeViews(View rootView) {
-        textViewName1 = rootView.findViewById(R.id.textViewName1);
         textViewTask1 = rootView.findViewById(R.id.textViewTask1);
 
         imageView1 = rootView.findViewById(R.id.imageView1);

@@ -28,6 +28,7 @@ import com.example.geomhelper.content.Courses;
 import com.example.geomhelper.fragments.FragmentAchievements;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -40,14 +41,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_ACHIEVEMENTS;
 
 public class AddCourseActivity extends AppCompatActivity {
 
-    RecyclerView recyclerView;
-    RVAdapter rvAdapter;
-    LinearLayoutManager linearLayoutManager;
-    List<Course> coursesList;
+    private List<Course> coursesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,7 @@ public class AddCourseActivity extends AppCompatActivity {
         if (Person.courses.size() == coursesList.size()) {
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);
-            Toast.makeText(getApplicationContext(), "Для вас нет доступных курсов", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.no_courses, Toast.LENGTH_LONG).show();
             finish();
         } else {
             ArrayList<Course> courses = new ArrayList<>();
@@ -70,10 +69,10 @@ public class AddCourseActivity extends AppCompatActivity {
                 if (!Person.c.contains(i + "")) courses.add(course);
             }
 
-            recyclerView = findViewById(R.id.recycler_add_course);
-            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            RecyclerView recyclerView = findViewById(R.id.recycler_add_course);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
             recyclerView.setLayoutManager(linearLayoutManager);
-            rvAdapter = new RVAdapter(getApplicationContext(), courses);
+            RVAdapter rvAdapter = new RVAdapter(getApplicationContext(), courses);
             recyclerView.setAdapter(rvAdapter);
         }
     }
@@ -82,16 +81,20 @@ public class AddCourseActivity extends AppCompatActivity {
 
         ArrayList<Course> items;
         Context context;
+        DB db;
 
         RVAdapter(Context context, ArrayList<Course> items) {
             this.items = items;
             this.context = context;
+            db = new DB(context);
         }
 
         @NonNull
         @Override
-        public RVAdapter.RecyclerViewCoursesHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_courses_card, parent, false);
+        public RVAdapter.RecyclerViewCoursesHolder onCreateViewHolder(
+                @NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_courses_card, parent, false);
             return new RVAdapter.RecyclerViewCoursesHolder(v);
         }
 
@@ -120,15 +123,16 @@ public class AddCourseActivity extends AppCompatActivity {
                 cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Person.courses.add(0, course);
+                        if (!Person.courses.contains(course))
+                            Person.courses.add(0, course);
                         Person.c += String.valueOf(coursesList.indexOf(course));
 
                         Achievements achievements = new Gson().fromJson(
-                                pref.getString("achievements", ""), Achievements.class);
+                                db.getString(NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
                         if (achievements == null) achievements = new Achievements();
                         achievements.setCourses(achievements.getCourses() + 1);
-                        pref.edit().putString("achievements", new Gson().toJson(
-                                achievements, Achievements.class)).apply();
+                        db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(
+                                achievements, Achievements.class));
 
                         if (achievements.getCourses() == FragmentAchievements.courses
                                 && !achievements.isCoursesB()) {
@@ -140,9 +144,9 @@ public class AddCourseActivity extends AppCompatActivity {
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "0")
                                     .setSmallIcon(R.drawable.ic_menu_leaderboard)
                                     .setColor(getResources().getColor(R.color.leaderboard))
-                                    .setContentTitle("GeomHelper")
-                                    .setContentText("Ты выполнил достижение! + " +
-                                            FragmentAchievements.coursesE + "xp")
+                                    .setContentTitle(getString(R.string.app_name))
+                                    .setContentText(getString(R.string.achievement_done) +
+                                            FragmentAchievements.coursesE + getString(R.string.xp))
                                     .setAutoCancel(true)
                                     .setWhen(System.currentTimeMillis())
                                     .setShowWhen(true);
@@ -155,34 +159,49 @@ public class AddCourseActivity extends AppCompatActivity {
                                 .addConverterFactory(ScalarsConverterFactory.create())
                                 .build();
                         UserService userService = retrofit.create(UserService.class);
-                        userService.updateUser(Person.id, "courses", Person.c)
+                        userService.updateUser(Person.uId, getString(R.string.param_courses), Person.c)
                                 .enqueue(new Callback<String>() {
                                     @Override
                                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                         if (Objects.requireNonNull(response.body()).equals("0"))
-                                            Toast.makeText(context, "Не дуалось отправить данные на сервер",
+                                            Toast.makeText(context, R.string.can_not_send_data,
                                                     Toast.LENGTH_SHORT).show();
                                     }
 
                                     @Override
                                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                        Toast.makeText(context, "Не удалось отправить данные на сервер",
+                                        Toast.makeText(context, R.string.can_not_send_data,
                                                 Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                        userService.updateUser(Person.id, "achievements",
-                                pref.getString("achievements", ""))
+                        userService.updateUser(Person.uId, "achievements",
+                                db.getString(NUM_COLUMN_ACHIEVEMENTS))
                                 .enqueue(new Callback<String>() {
                                     @Override
                                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                         if (Objects.requireNonNull(response.body()).equals("0"))
-                                            Toast.makeText(context, "Не дуалось отправить данные на сервер",
+                                            Toast.makeText(context, R.string.can_not_send_data,
                                                     Toast.LENGTH_SHORT).show();
                                     }
 
                                     @Override
                                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                        Toast.makeText(context, "Не удалось отправить данные на сервер",
+                                        Toast.makeText(context, R.string.can_not_send_data,
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                        userService.updateUser(Person.uId, "experience", String.valueOf(Person.experience))
+                                .enqueue(new Callback<String>() {
+                                    @Override
+                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                        if (Objects.requireNonNull(response.body()).equals("0"))
+                                            Toast.makeText(context, R.string.can_not_send_data,
+                                                    Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                        Toast.makeText(context, R.string.can_not_send_data,
                                                 Toast.LENGTH_SHORT).show();
                                     }
                                 });

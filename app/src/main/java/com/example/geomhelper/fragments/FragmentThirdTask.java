@@ -35,7 +35,7 @@ public class FragmentThirdTask extends Fragment {
     private ImageView imageView3;
     private EditText editText31, editText32, editText33;
     private ThirdTask thirdTask;
-    static int fabTest = 0, fabTheme = 0, fabStage = 0;
+    public static int fabTest = 0, fabTheme = 0, fabStage = 0;
 
     @Nullable
     @Override

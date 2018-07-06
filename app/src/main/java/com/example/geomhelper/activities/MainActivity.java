@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -34,22 +33,37 @@ import com.example.geomhelper.fragments.FragmentTests;
 import com.example.geomhelper.fragments.FragmentThemes;
 import com.example.geomhelper.fragments.FragmentTheorems;
 import com.example.geomhelper.resources.ShowNotification;
+import com.example.geomhelper.sqlite.DB;
 
 import java.util.List;
 import java.util.Objects;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.Person.APP_PREFERENCES;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_C;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEADERBOARDPLACE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEVEL;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEVEL_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_NAME;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_SETTINGS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_UID;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_C;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_DAY_NIGHT;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_LEADERBOARDPLACE;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_LEVEL;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_LEVEL_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_NAME;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_UID;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_SETTINGS;
 
 public class MainActivity extends AppCompatActivity {
 
     public static int back = 0;
-    final int NUM_PAGES = 5;
-    BottomNavigationView bottomNavigationView;
-    ViewPager viewPager;
-    PagerAdapter pagerAdapter;
-    static SharedPreferences.Editor editor;
-    boolean backCourses = false, backTests = false;
-    List<Course> courses;
+    private BottomNavigationView bottomNavigationView;
+    private ViewPager viewPager;
+    private boolean backCourses = false, backTests = false;
+    private DB db;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -94,15 +108,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        pref = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-        if (!pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+        Person.id = getSharedPreferences(APP_PREFERENCES,
+                Context.MODE_PRIVATE).getLong("id", -1);
+        if (Person.id == -1) {
             Intent i = new Intent(getApplicationContext(), StartActivity.class);
             startActivity(i);
         }
+
+        db = new DB(getApplicationContext());
+
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
-            switch (pref.getString("pref_day_night", "")) {
+            switch (db.getString(NUM_COLUMN_DAY_NIGHT)) {
                 case "Включен":
                     AppCompatDelegate.setDefaultNightMode(
                             AppCompatDelegate.MODE_NIGHT_YES);
@@ -129,28 +147,23 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        courses = new Courses().getCurrentCourses();
+        List<Course> courses = new Courses().getCurrentCourses();
 
         getWindow().setBackgroundDrawable(null);
 
-        if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
-            Person.name = pref.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
-            Person.id = pref.getString(Person.APP_PREFERENCES_UID, "-1");
-            Person.currentLevel = pref.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
-            Person.experience = pref.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
-            Person.currentLevelExperience = pref.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
-            Person.leaderBoardPlace = pref.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
-            Person.c = pref.getString("c", "");
-
-            for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
-                if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
-                    String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
-                    for (int j = 0; j < courses.size(); j++) {
-                        if (pref.getString(course, "").equals(courses.get(j).getCourseName())) {
-                            Person.courses.add(i, courses.get(j));
-                        }
-                    }
-                }
+        if (Person.id != -1) {
+            Person.name = db.getString(NUM_COLUMN_NAME);
+            Person.uId = db.getString(NUM_COLUMN_UID);
+            Person.currentLevel = db.getString(NUM_COLUMN_LEVEL);
+            Person.experience = db.getInt(NUM_COLUMN_EXPERIENCE);
+            Person.currentLevelExperience = db.getInt(NUM_COLUMN_LEVEL_EXPERIENCE);
+            Person.leaderBoardPlace = db.getInt(NUM_COLUMN_LEADERBOARDPLACE);
+            Person.c = db.getString(NUM_COLUMN_C);
+            if (Person.c.equals("{}"))
+                Person.c = "";
+            for (int i = 0; i < Person.c.length(); i++) {
+                if (!Person.courses.contains(courses.get(Integer.valueOf(Person.c.charAt(i) + ""))))
+                    Person.courses.add(courses.get(Integer.valueOf(Person.c.charAt(i) + "")));
             }
         } else {
             Intent i = new Intent(getApplicationContext(), StartActivity.class);
@@ -158,13 +171,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         viewPager = findViewById(R.id.pager);
-        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        PagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setPageTransformer(true, new FadePageTransformer());
         viewPager.setAdapter(pagerAdapter);
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        if (!pref.getBoolean("fragment_settings", false)) {
+        if (db.getInt(NUM_SETTINGS) == 0) {
             viewPager.setCurrentItem(2);
             bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -176,9 +189,7 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setBackgroundResource(R.drawable.bnv_settings);
-            editor = pref.edit();
-            editor.putBoolean("fragment_settings", false);
-            editor.apply();
+            db.putInt(COLUMN_SETTINGS, 0);
         }
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -296,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return NUM_PAGES;
+            return 5;
         }
 
     }
@@ -304,26 +315,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        saveAll(true, Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false));
+        saveAll();
     }
 
-    public static void saveAll(boolean d, boolean welcome) {
-        editor = pref.edit();
-        editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-        editor.putString(Person.APP_PREFERENCES_UID, Person.id);
-        editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
-        editor.putInt(Person.APP_PREFERENCES_EXPERIENCE, Person.experience);
-        editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
-        editor.putLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, Person.leaderBoardPlace);
-        editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
-        editor.putString("c", Person.c);
-        if (d) editor.putBoolean("image", false);
-        if (d) editor.putBoolean(Person.APP_PREFERENCES_WELCOME, welcome);
-        for (int i = 0; i < Person.courses.size(); i++) {
-            String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
-            editor.putString(course, Person.courses.get(i).getCourseName());
-        }
-        editor.apply();
+    public void saveAll() {
+        db.putString(COLUMN_NAME, Person.name);
+        db.putString(COLUMN_UID, Person.uId);
+        db.putString(COLUMN_LEVEL, Person.currentLevel);
+        db.putInt(COLUMN_EXPERIENCE, Person.experience);
+        db.putInt(COLUMN_LEVEL_EXPERIENCE, Person.currentLevelExperience);
+        db.putInt(COLUMN_LEADERBOARDPLACE, Person.leaderBoardPlace);
+        db.putString(COLUMN_C, Person.c);
     }
 
     @Override
@@ -337,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
             if (position <= -1.0F || position >= 1.0F) {
                 view.setAlpha(0.0F);
                 view.setVisibility(View.GONE);
-            } else if (position == 0.0F) {     // [0]
+            } else if (position == 0.0F) {
                 view.setAlpha(1.0F);
                 view.setVisibility(View.VISIBLE);
             } else {

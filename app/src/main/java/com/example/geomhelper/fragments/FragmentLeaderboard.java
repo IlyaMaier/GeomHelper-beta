@@ -18,6 +18,7 @@ import com.example.geomhelper.R;
 import com.example.geomhelper.resources.RVLeaderboardAdapter;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -30,28 +31,28 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_DESC;
+
 public class FragmentLeaderboard extends Fragment {
 
     public FragmentLeaderboard() {
     }
 
-    RecyclerView recyclerView;
-    RelativeLayout relativeLayout;
-    RVLeaderboardAdapter rvLeaderboardAdapter;
-    ProgressBar progressBar;
-    BottomNavigationView bottomNavigationView;
-    List<User> users;
+    private RecyclerView recyclerView;
+    private RVLeaderboardAdapter rvLeaderboardAdapter;
+    private ProgressBar progressBar;
+    private List<User> users;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_leaderboard, container, false);
 
-        relativeLayout = rootView.findViewById(R.id.frame_leaderboard);
+        RelativeLayout relativeLayout = rootView.findViewById(R.id.frame_leaderboard);
 
         users = new ArrayList<>();
 
-        rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), users);
+        rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), users, false);
 
         recyclerView = rootView.findViewById(R.id.rv_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -65,7 +66,7 @@ public class FragmentLeaderboard extends Fragment {
         relativeLayout.addView(progressBar, params);
         progressBar.setVisibility(View.VISIBLE);
 
-        bottomNavigationView = Objects.requireNonNull(getActivity()).
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(getActivity()).
                 findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(
                 new BottomNavigationView.OnNavigationItemReselectedListener() {
@@ -77,12 +78,16 @@ public class FragmentLeaderboard extends Fragment {
                     }
                 });
 
+        DB db = new DB(getContext());
+        int desc = db.getInt(NUM_DESC);
+        if (desc < 10)
+            desc = 10;
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(User.URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
         UserService userService = retrofit.create(UserService.class);
-        userService.getLeaders().enqueue(new Callback<String>() {
+        userService.getLeaders(desc).enqueue(new Callback<String>() {
                     String result;
 
                     @Override

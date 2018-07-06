@@ -24,8 +24,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.example.geomhelper.R;
-import com.example.geomhelper.content.Course;
-import com.example.geomhelper.content.Courses;
 import com.example.geomhelper.content.Definitions;
 
 import java.util.ArrayList;
@@ -36,18 +34,19 @@ import static com.example.geomhelper.activities.MainActivity.back;
 
 public class FragmentDefinitions extends Fragment {
 
-    View view;
-    RecyclerView recyclerView;
-    RVAdapter rvAdapter;
-    List<String> defs, definitions, defs1, definitions1, forms, themes;
-    CardView card;
-    EditText et;
-    Definitions definitionsClass;
-    int height;
-    float y;
-    long millis;
-    int f = 7, t = 1;
-    boolean search = false, form = true, theme = false, def = false, s = false;
+    private RecyclerView recyclerView;
+    private RVAdapter rvAdapter;
+    private List<String> defs;
+    private List<String> definitions;
+    private List<String> defs1;
+    private List<String> definitions1;
+    private CardView card;
+    private Definitions definitionsClass;
+    private int height;
+    private float y;
+    private long millis;
+    private int f = 7, t = 1;
+    private boolean search = false, form = true, theme = false, def = false, s = false;
     public static volatile boolean h = true;
 
     public FragmentDefinitions() {
@@ -57,7 +56,7 @@ public class FragmentDefinitions extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_definitions, container, false);
+        View view = inflater.inflate(R.layout.fragment_definitions, container, false);
 
         getThread().start();
 
@@ -67,14 +66,23 @@ public class FragmentDefinitions extends Fragment {
         definitions = definitionsClass.getDefinitions();
         defs1 = new ArrayList<>();
         definitions1 = new ArrayList<>();
-        forms = new ArrayList<>();
-        themes = new ArrayList<>();
-
-        List<Course> courses = new Courses().getCurrentCourses();
-        for (int i = 0; i < courses.size(); i++)
-            themes.add(courses.get(i).getCourseName());
+        List<String> forms = new ArrayList<>();
+        List<String> themes = new ArrayList<>();
 
         forms.add("7 класс");
+        forms.add("8 класс");
+
+        themes.add("7");
+        themes.add(getString(R.string.basic_geom_knowledwes));
+        themes.add(getString(R.string.triangles));
+        themes.add(getString(R.string.parallel_straights));
+        themes.add(getString(R.string.beetween));
+        themes.add("8");
+        themes.add(getString(R.string.many_angles));
+        themes.add(getString(R.string.square));
+        themes.add(getString(R.string.same_triangles));
+        themes.add(getString(R.string.ring));
+        themes.add("9");
 
         rvAdapter = new RVAdapter();
         rvAdapter.setForms(forms);
@@ -101,8 +109,8 @@ public class FragmentDefinitions extends Fragment {
         frameLayout.addView(card, layoutParams);
         card.setTranslationY(-height);
 
-        et = view.findViewById(R.id.search);
-        et.setHint("Поиск определений");
+        EditText et = view.findViewById(R.id.search);
+        et.setHint(R.string.search_of_definitions);
 
         final int finalHeight = height;
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
@@ -191,6 +199,7 @@ public class FragmentDefinitions extends Fragment {
         private List<String> definitionsSearch;
         private List<String> forms;
         private List<String> themes;
+        private List<String> themesC;
 
         RVAdapter() {
         }
@@ -214,7 +223,7 @@ public class FragmentDefinitions extends Fragment {
             } else if (form)
                 d = forms.get(position);
             else if (theme)
-                d = themes.get(position);
+                d = themesC.get(position);
             else {
                 d = defs.get(position);
                 d1 = " - " + definitions.get(position);
@@ -230,7 +239,7 @@ public class FragmentDefinitions extends Fragment {
             if (form)
                 return forms.size();
             if (theme)
-                return themes.size();
+                return themesC.size();
             if (def)
                 return defs.size();
             return 0;
@@ -278,6 +287,9 @@ public class FragmentDefinitions extends Fragment {
                             f = id + 7;
                             form = false;
                             theme = true;
+                            int r = themes.indexOf(String.valueOf(f));
+                            int r1 = themes.indexOf(String.valueOf(f + 1));
+                            themesC = themes.subList(r + 1, r1);
                             rvAdapter.notifyDataSetChanged();
                             back = 7;
                         } else if (theme) {

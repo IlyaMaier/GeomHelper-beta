@@ -21,10 +21,7 @@ import java.util.Objects;
 
 public class FragmentTestThemes extends Fragment {
 
-    Resources resources = new Resources();
-    Button[] button;
-    LinearLayout linearLayout;
-    Test test;
+    private Resources resources = new Resources();
 
     public FragmentTestThemes() { }
 
@@ -33,10 +30,10 @@ public class FragmentTestThemes extends Fragment {
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_test_themes, container, false);
 
-        test = new Tests().getCurrentTests().get(Person.currentTest);
+        Test test = new Tests().getCurrentTests().get(Person.currentTest);
 
-        linearLayout = rootView.findViewById(R.id.linearLayoutFragmentTestThemes);
-        button = new Button[test.getNumberOfThemes()];
+        LinearLayout linearLayout = rootView.findViewById(R.id.linearLayoutFragmentTestThemes);
+        Button[] button = new Button[test.getNumberOfThemes()];
 
         for (int i = 0; i < button.length; i++) {
             button[i] = new Button(getContext());

@@ -1,6 +1,7 @@
 package com.example.geomhelper.fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -14,12 +15,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +40,10 @@ import com.example.geomhelper.activities.MainActivity;
 import com.example.geomhelper.content.Achievements;
 import com.example.geomhelper.content.Levels;
 import com.example.geomhelper.resources.CircleImageView;
+import com.example.geomhelper.resources.RVLeaderboardAdapter;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -52,6 +57,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -62,17 +69,17 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_DESC;
 
 public class FragmentProfile extends Fragment {
 
-    TextView textLevelName, textExperience, textName;
-    CircleImageView circleImageView;
-    Bitmap bitmap;
-    ScrollView scrollView;
-    Context context;
-    BottomNavigationView bottomNavigationView;
-    Button theorems, definitions, achievements;
+    private TextView textName;
+    private CircleImageView circleImageView;
+    private Bitmap bitmap;
+    private ScrollView scrollView;
+    private Context context;
     public static volatile boolean d = false, a = false, social = false;
     public static String personPhotoUrl = "";
 
@@ -86,22 +93,24 @@ public class FragmentProfile extends Fragment {
 
         context = getContext();
 
+        DB db = new DB(context);
+
         Achievements achievs = new Gson().fromJson(
-                pref.getString("achievements", ""), Achievements.class);
+                db.getString(NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
         if (achievs == null) achievs = new Achievements();
 
         if (Person.experience >= FragmentAchievements.xp
                 && !achievs.isXp()) {
             Person.experience += FragmentAchievements.xpE;
             achievs.setXp(true);
-            pref.edit().putString("achievements", new Gson().toJson(achievs, Achievements.class)).apply();
+            db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(achievs, Achievements.class));
             NotificationManager notificationManager = (NotificationManager)
                     Objects.requireNonNull(getContext()).getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "0")
                     .setSmallIcon(R.drawable.ic_menu_leaderboard)
                     .setColor(getResources().getColor(R.color.leaderboard))
-                    .setContentTitle("GeomHelper")
-                    .setContentText("Ты выполнил достижение! + " +
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.achievement_done) +
                             FragmentAchievements.xpE + "xp")
                     .setAutoCancel(true)
                     .setWhen(System.currentTimeMillis())
@@ -113,33 +122,46 @@ public class FragmentProfile extends Fragment {
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build();
             UserService userService = retrofit.create(UserService.class);
-            userService.updateUser(Person.id, "achievements",
-                    pref.getString("achievements", ""))
+            userService.updateUser(Person.uId, "achievements",
+                    db.getString(NUM_COLUMN_ACHIEVEMENTS))
                     .enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             if (Objects.requireNonNull(response.body()).equals("0"))
-                                Toast.makeText(getContext(), "Не дуалось отправить данные на сервер",
+                                Toast.makeText(getContext(), R.string.can_not_send_data,
                                         Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Toast.makeText(getContext(), "Не удалось отправить данные на сервер",
+                            Toast.makeText(getContext(), R.string.can_not_send_data,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            userService.updateUser(Person.uId, "experience", String.valueOf(Person.experience))
+                    .enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (Objects.requireNonNull(response.body()).equals("0"))
+                                Toast.makeText(context, R.string.can_not_send_data,
+                                        Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Toast.makeText(context, R.string.can_not_send_data,
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
         }
 
-        bottomNavigationView = Objects.requireNonNull(getActivity())
-                .findViewById(R.id.navigation);
         textName = rootView.findViewById(R.id.textName);
-        textLevelName = rootView.findViewById(R.id.textLevelName);
-        textExperience = rootView.findViewById(R.id.textExperince);
+        TextView textLevelName = rootView.findViewById(R.id.textLevelName);
+        TextView textExperience = rootView.findViewById(R.id.textExperince);
         circleImageView = rootView.findViewById(R.id.imageProfile);
-        theorems = rootView.findViewById(R.id.teorems);
-        definitions = rootView.findViewById(R.id.definitions);
-        achievements = rootView.findViewById(R.id.achievements);
+        Button theorems = rootView.findViewById(R.id.teorems);
+        Button definitions = rootView.findViewById(R.id.definitions);
+        Button achievements = rootView.findViewById(R.id.achievements);
 
         if (social) {
             Glide.with(getContext()).load(personPhotoUrl)
@@ -194,7 +216,7 @@ public class FragmentProfile extends Fragment {
                 et.setText(Person.name);
                 final AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setView(et)
-                        .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 String name = et.getText().toString();
                                 if (name.contains("\n"))
@@ -210,25 +232,25 @@ public class FragmentProfile extends Fragment {
                                             .addConverterFactory(ScalarsConverterFactory.create())
                                             .build();
                                     UserService userService = retrofit.create(UserService.class);
-                                    userService.updateUser(Person.id, "name", Person.name)
+                                    userService.updateUser(Person.uId, "name", Person.name)
                                             .enqueue(new Callback<String>() {
                                                 @Override
                                                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                                     if (Objects.requireNonNull(response.body()).equals("0"))
-                                                        Toast.makeText(context, "Не удалось отправить имя на сервер",
+                                                        Toast.makeText(context, R.string.can_not_send_data,
                                                                 Toast.LENGTH_SHORT).show();
                                                 }
 
                                                 @Override
                                                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                                    Toast.makeText(context, "Не удалось отправить имя на сервер",
+                                                    Toast.makeText(context, R.string.can_not_send_data,
                                                             Toast.LENGTH_SHORT).show();
                                                 }
                                             });
                                     textName.setText(Person.name);
                                 }
                             }
-                        }).setNegativeButton("ОТМЕНИТЬ", new DialogInterface.OnClickListener() {
+                        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -281,6 +303,57 @@ public class FragmentProfile extends Fragment {
                 fragmentTransaction.commit();
             }
         });
+
+        final List<User> friends = new ArrayList<>();
+
+        final RVLeaderboardAdapter rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), friends, false);
+
+        final RecyclerView recyclerView = rootView.findViewById(R.id.rv_profile);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(rvLeaderboardAdapter);
+
+        int desc = db.getInt(NUM_DESC);
+        if (desc < 10)
+            desc = 10;
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(User.URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        UserService userService = retrofit.create(UserService.class);
+        userService.getLeaders(desc).enqueue(new Callback<String>() {
+            String result;
+
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                result = response.body();
+                result = Objects.requireNonNull(result).replace("[", "");
+                result = result.replace("]", "");
+                String[] split = result.split(",");
+                Gson gson = new Gson();
+                StringBuilder q = new StringBuilder();
+                int a = 0;
+                for (String aSplit : split) {
+                    if (aSplit.contains("}")) q.append(aSplit);
+                    else q.append(aSplit).append(",");
+                    a++;
+                    if (aSplit.contains("}")) {
+                        friends.add(gson.fromJson(q.toString(), User.class));
+                        a = 0;
+                        q = new StringBuilder();
+                    }
+                }
+
+                rvLeaderboardAdapter.setData(friends);
+                rvLeaderboardAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+            }
+        });
+
         return rootView;
     }
 
@@ -323,13 +396,13 @@ public class FragmentProfile extends Fragment {
                     StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                     Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getContext()).getFilesDir(),
                             "profileImage.png"));
-                    StorageReference profileRef = mStorageRef.child(Person.id);
+                    StorageReference profileRef = mStorageRef.child(Person.uId);
                     profileRef.putFile(file1)
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception exception) {
                                     Toast.makeText(getContext(),
-                                            "Не удалось загрузить изображение",
+                                            R.string.can_not_load_image,
                                             Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -337,10 +410,11 @@ public class FragmentProfile extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class Async extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            Bitmap bitmap1 = null;
+            Bitmap bitmap1;
             try {
                 bitmap1 = Glide
                         .with(context)
@@ -369,13 +443,13 @@ public class FragmentProfile extends Fragment {
                         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                         Uri file1 = Uri.fromFile(new File(Objects.requireNonNull(getContext()).getFilesDir(),
                                 "profileImage.png"));
-                        StorageReference profileRef = mStorageRef.child(Person.id);
+                        StorageReference profileRef = mStorageRef.child(Person.uId);
                         profileRef.putFile(file1)
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception exception) {
                                         Toast.makeText(getContext(),
-                                                "Не удалось загрузить изображение",
+                                                R.string.can_not_load_image,
                                                 Toast.LENGTH_SHORT).show();
                                     }
                                 })
@@ -399,6 +473,7 @@ public class FragmentProfile extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class Async1 extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {

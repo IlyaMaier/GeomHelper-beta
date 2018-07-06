@@ -12,16 +12,12 @@ import com.example.geomhelper.R;
 
 public class FragmentStart2 extends Fragment {
 
-    View view;
-
     public FragmentStart2() {
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_start_2, container, false);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_start_2, container, false);
     }
 }

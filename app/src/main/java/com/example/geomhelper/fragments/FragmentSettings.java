@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -25,10 +24,10 @@ import android.widget.Toast;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.activities.LoginActivity;
-import com.example.geomhelper.activities.MainActivity;
 import com.example.geomhelper.content.Achievements;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -44,29 +43,45 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_C;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_DAY_NIGHT;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_DESC;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_FACEBOOK;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_GOOGLE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_IMAGE_LEADERS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEADERBOARDPLACE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEVEL;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_LEVEL_EXPERIENCE;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_NAME;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_SETTINGS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_TESTS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_UID;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_VK;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_FACEBOOK;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_GOOGLE;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_VK;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_DESC;
 
 public class FragmentSettings extends PreferenceFragmentCompat
         implements GoogleApiClient.OnConnectionFailedListener {
 
-    private EditTextPreference editTextPreferenceName;
-    private SharedPreferences mSettings;
-    private SharedPreferences.Editor editor;
+    private EditTextPreference editTextPreferenceName, descPreference;
     private Activity mCurrentActivity;
     private AlertDialog.Builder builder;
     private GoogleApiClient mGoogleApiClient;
+    private DB db;
+    private int desc;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
+        db = new DB(getContext());
+
         mCurrentActivity = getActivity();
         setPreferencesFromResource(R.xml.preferences, rootKey);
-
-        try {
-            mSettings = mCurrentActivity.getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
 
         editTextPreferenceName = (EditTextPreference) findPreference("name");
         editTextPreferenceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -94,18 +109,18 @@ public class FragmentSettings extends PreferenceFragmentCompat
                             .addConverterFactory(ScalarsConverterFactory.create())
                             .build();
                     UserService userService = retrofit.create(UserService.class);
-                    userService.updateUser(Person.id, "name", Person.name)
+                    userService.updateUser(Person.uId, "name", Person.name)
                             .enqueue(new Callback<String>() {
                                 @Override
                                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                     if (Objects.requireNonNull(response.body()).equals("0"))
-                                        Toast.makeText(getContext(), "Не удалось отправить имя на сервер",
+                                        Toast.makeText(getContext(), R.string.can_not_send_name,
                                                 Toast.LENGTH_SHORT).show();
                                 }
 
                                 @Override
                                 public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                    Toast.makeText(getContext(), "Не удалось отправить имя на сервер",
+                                    Toast.makeText(getContext(), R.string.can_not_send_name,
                                             Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -114,12 +129,43 @@ public class FragmentSettings extends PreferenceFragmentCompat
             }
         });
 
-        ListPreference listPreference = (ListPreference) findPreference("pref_day_night");
-        listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        desc = db.getInt(NUM_DESC);
+        if (desc < 10)
+            desc = 10;
+
+        editTextPreferenceName = (EditTextPreference) findPreference("desc");
+        editTextPreferenceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                editTextPreferenceName.setText(String.valueOf(desc));
+                return false;
+            }
+        });
+
+        editTextPreferenceName.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                MainActivity.saveAll(true, true);
-                editor = mSettings.edit();
+                int v;
+                try {
+                    v = Integer.parseInt(newValue.toString());
+                } catch (Exception e) {
+                    v = 10;
+                }
+                if (v < 10)
+                    desc = 10;
+                else desc = v;
+                db.putInt(COLUMN_DESC, desc);
+                return true;
+            }
+        });
+
+        ListPreference listPreference = (ListPreference) findPreference("pref_day_night");
+        listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+
+        {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                saveAll();
                 if (newValue.equals("Включен")) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                     try {
@@ -129,8 +175,8 @@ public class FragmentSettings extends PreferenceFragmentCompat
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night", "Включен");
-                } else if (newValue.equals("Выключен")) {
+                    db.putString(COLUMN_DAY_NIGHT, getString(R.string.on));
+                } else if (newValue.equals(getString(R.string.off))) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                     try {
                         mCurrentActivity.finish();
@@ -139,7 +185,7 @@ public class FragmentSettings extends PreferenceFragmentCompat
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night", "Выключен");
+                    db.putString(COLUMN_DAY_NIGHT, getString(R.string.off));
                 } else {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
                     try {
@@ -149,20 +195,21 @@ public class FragmentSettings extends PreferenceFragmentCompat
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night", "Авто");
+                    db.putString(COLUMN_DAY_NIGHT, getString(R.string.auto));
                 }
-                editor.putBoolean("fragment_settings", true);
-                editor.apply();
+                db.putInt(COLUMN_SETTINGS, 1);
                 return true;
             }
         });
 
         Preference share = findPreference("share");
-        share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 Achievements achievements = new Gson().fromJson(
-                        pref.getString("achievements", ""), Achievements.class);
+                        db.getString(NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
                 if (achievements == null) achievements = new Achievements();
                 achievements.setShared(achievements.getShared() + 1);
 
@@ -174,8 +221,8 @@ public class FragmentSettings extends PreferenceFragmentCompat
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "0")
                             .setSmallIcon(R.drawable.ic_menu_leaderboard)
                             .setColor(getResources().getColor(R.color.leaderboard))
-                            .setContentTitle("GeomHelper")
-                            .setContentText("Ты выполнил достижение! + " +
+                            .setContentTitle(getString(R.string.app_name))
+                            .setContentText(getString(R.string.achievement_done) +
                                     FragmentAchievements.sharedE + "xp")
                             .setAutoCancel(true)
                             .setWhen(System.currentTimeMillis())
@@ -183,27 +230,42 @@ public class FragmentSettings extends PreferenceFragmentCompat
                     Notification notification = builder.build();
                     Objects.requireNonNull(notificationManager).notify(0, notification);
                 }
-                pref.edit().putString("achievements", new Gson().toJson(
-                        achievements, Achievements.class)).apply();
+                db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(
+                        achievements, Achievements.class));
 
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(User.URL)
                         .addConverterFactory(ScalarsConverterFactory.create())
                         .build();
                 UserService userService = retrofit.create(UserService.class);
-                userService.updateUser(Person.id, "achievements",
-                        pref.getString("achievements", ""))
+                userService.updateUser(Person.uId, "achievements",
+                        db.getString(NUM_COLUMN_ACHIEVEMENTS))
                         .enqueue(new Callback<String>() {
                             @Override
                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                if (Objects.requireNonNull(response.body()).equals("0"))
-                                    Toast.makeText(getContext(), "Не дуалось отправить данные на сервер",
+                                if (response.body() == null || response.body().equals("0"))
+                                    Toast.makeText(getContext(), R.string.can_not_send_data,
                                             Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Toast.makeText(getContext(), "Не удалось отправить данные на сервер",
+                                Toast.makeText(getContext(), R.string.can_not_send_data,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                userService.updateUser(Person.uId, "experience", String.valueOf(Person.experience))
+                        .enqueue(new Callback<String>() {
+                            @Override
+                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                if (response.body() == null || response.body().equals("0"))
+                                    Toast.makeText(getContext(), R.string.can_not_send_data,
+                                            Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                Toast.makeText(getContext(), R.string.can_not_send_data,
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -211,27 +273,24 @@ public class FragmentSettings extends PreferenceFragmentCompat
                 Intent i = new Intent();
                 i.setAction(Intent.ACTION_SEND);
                 i.putExtra(Intent.EXTRA_TEXT,
-                        "Скачай приложение GeomHelper! Оно поможет тебе в изучении геометрии по школьной программе!" +
+                        getString(R.string.download_app) +
                                 "https://yadi.sk/d/ub5kRUYy3SSHWC");
                 i.setType("text/plain");
-                startActivity(Intent.createChooser(i, "Поделиться"));
+                startActivity(Intent.createChooser(i, getString(R.string.share)));
                 return false;
             }
         });
 
         Preference news = findPreference("news");
-        news.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        news.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Что нового");
-                builder.setMessage("Добавлен стартовый экран.\n" +
-                        "Добавлена возможность входа через социальные сети.\n" +
-                        "Добавлены тесты, а также переписан полностью сервер.\n" +
-                        "Добавлено множество анимаций.\n" +
-                        "Добавлена возможность смены email и пароля.\n" +
-                        "Обновлены разделы в настройках.\n");
-                builder.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                builder.setMessage(getString(R.string.whats_new));
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
                         dialog.cancel();
                     }
@@ -242,14 +301,15 @@ public class FragmentSettings extends PreferenceFragmentCompat
         });
 
         Preference aboutAuthors = findPreference("about_authors");
-        aboutAuthors.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        aboutAuthors.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Об авторах");
-                builder.setMessage("Проект написан Ильей Майером и Мирославой Чобитько.\n" +
-                        "Отдельная благодарность за помощь в разработке дизайна Ямалову Роману!");
-                builder.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.about_authors);
+                builder.setMessage(R.string.app_done);
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
                         dialog.cancel();
                     }
@@ -260,17 +320,15 @@ public class FragmentSettings extends PreferenceFragmentCompat
         });
 
         Preference about = findPreference("about");
-        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("О приложении");
-                builder.setMessage("У многих школьников возникают проблемы с изучением такого непростого предмета, как геометрия.\n" +
-                        "\n" +
-                        "Идея нашего проекта заключается в создании простого в понимании интерактивного учебника с разнообразными тестами и заданиями, который поможет решить эту проблему. \n" +
-                        "\n" +
-                        "Так же мы хотим реализовать турнирную таблицу, чтобы каждый пользователь мог наблюдать не только за своими успехами, но и за успехами других людей.\n");
-                builder.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.about);
+                builder.setMessage(R.string.about_app);
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
                         dialog.cancel();
                     }
@@ -281,44 +339,51 @@ public class FragmentSettings extends PreferenceFragmentCompat
         });
 
         Preference acc = findPreference("acc");
-        acc.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        acc.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(final Preference preference) {
                 builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Выход из аккаунта");
-                builder.setMessage("Вы действительно хотите выйти из аккаунта?");
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.exit);
+                builder.setMessage(R.string.are_you_sure);
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
                         Person.name = "";
-                        Person.id = "";
+                        Person.uId = "";
                         Person.courses.clear();
                         Person.experience = 0;
                         Person.leaderBoardPlace = 0;
                         Person.c = "";
                         Person.currentTest = 0;
                         Person.currentTestTheme = 0;
+                        saveAll();
+
+                        Objects.requireNonNull(getActivity()).getSharedPreferences(
+                                Person.APP_PREFERENCES, Context.MODE_PRIVATE)
+                                .edit().putLong("id", -1).apply();
 
                         Achievements achievements = new Achievements();
-                        pref.edit().putString("achievements", new Gson().toJson(
-                                achievements, Achievements.class)).apply();
+                        db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(
+                                achievements, Achievements.class));
 
-                        pref.edit().putString("tests", "").putString("pref_day_night", "Выключен").apply();
+                        db.putString(COLUMN_TESTS, "");
+                        db.putString(COLUMN_DAY_NIGHT, "2");
 
-                        if (pref.getBoolean("facebook", false)) {
+                        if (db.getInt(NUM_COLUMN_FACEBOOK) == 1) {
                             LoginManager.getInstance().logOut();
-                            pref.edit().putBoolean("facebook", false).apply();
+                            db.putInt(COLUMN_FACEBOOK, 0);
                         }
-                        if (pref.getBoolean("google", false)) {
+                        if (db.getInt(NUM_COLUMN_GOOGLE) == 1) {
                             Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-                            pref.edit().putBoolean("google", false).apply();
+                            db.putInt(COLUMN_GOOGLE, 0);
                         }
-                        pref.edit().putBoolean("vk", false).apply();
-                        MainActivity.saveAll(true, false);
+                        db.putInt(COLUMN_VK, 0);
                         Intent i = new Intent(getContext(), LoginActivity.class);
                         startActivity(i);
                     }
                 });
-                builder.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
@@ -332,14 +397,16 @@ public class FragmentSettings extends PreferenceFragmentCompat
 
 
         Preference email = findPreference("email");
-        email.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        email.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if (pref.getBoolean("facebook", false)
-                        || pref.getBoolean("google", false)
-                        || pref.getBoolean("vk", false)) {
+                if (db.getInt(NUM_COLUMN_FACEBOOK) == 0
+                        || db.getInt(NUM_COLUMN_GOOGLE) == 0
+                        || db.getInt(NUM_COLUMN_VK) == 0) {
                     Toast.makeText(getContext(),
-                            "Нельзя изменить Email при входе через социальные сети.",
+                            R.string.can_not_change_email,
                             Toast.LENGTH_SHORT).show();
                     return false;
                 }
@@ -350,12 +417,12 @@ public class FragmentSettings extends PreferenceFragmentCompat
                 final EditText input1 = textEntryView.findViewById(R.id.et_email1);
                 final EditText input2 = textEntryView.findViewById(R.id.et_email2);
 
-                builder.setTitle("Смена Email");
+                builder.setTitle(R.string.change_email);
                 builder.setView(textEntryView);
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, int arg1) {
                         if (input2.getText() == null || input2.getText().toString().isEmpty()) {
-                            Toast.makeText(getContext(), "Вы ввели пустой Email",
+                            Toast.makeText(getContext(), R.string.void_email,
                                     Toast.LENGTH_SHORT).show();
                             dialog.cancel();
                             return;
@@ -366,7 +433,7 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                 .addConverterFactory(ScalarsConverterFactory.create())
                                 .build();
                         UserService userService = retrofit.create(UserService.class);
-                        userService.changeEmail(Person.id, User.md5(input1.getText().toString())
+                        userService.changeEmail(Person.uId, User.md5(input1.getText().toString())
                                 , input2.getText().toString())
                                 .enqueue(new Callback<String>() {
                                     @Override
@@ -374,16 +441,16 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                                            @NonNull Response<String> response) {
                                         String r = response.body();
                                         if (Objects.requireNonNull(r).equals("0"))
-                                            Toast.makeText(getContext(), "Произошла ошибка на сервере!",
+                                            Toast.makeText(getContext(), R.string.error_on_server,
                                                     Toast.LENGTH_SHORT).show();
                                         else if (r.equals("2")) {
-                                            Toast.makeText(getContext(), "Неправильный пароль!",
+                                            Toast.makeText(getContext(), R.string.wrong_password,
                                                     Toast.LENGTH_SHORT).show();
                                         } else if (r.equals("3")) {
-                                            Toast.makeText(getContext(), "Данный Email уже занят.",
+                                            Toast.makeText(getContext(), R.string.this_email_is_busy,
                                                     Toast.LENGTH_SHORT).show();
                                         } else if (r.equals("1")) {
-                                            Toast.makeText(getContext(), "Email изменен!",
+                                            Toast.makeText(getContext(), R.string.changed_email,
                                                     Toast.LENGTH_SHORT).show();
                                             dialog.cancel();
                                         }
@@ -396,7 +463,7 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                 });
                     }
                 });
-                builder.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
@@ -413,14 +480,16 @@ public class FragmentSettings extends PreferenceFragmentCompat
         });
 
         Preference password = findPreference("password");
-        password.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        password.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+
+        {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if (pref.getBoolean("facebook", false)
-                        || pref.getBoolean("google", false)
-                        || pref.getBoolean("vk", false)) {
+                if (db.getInt(NUM_COLUMN_FACEBOOK) == 0
+                        || db.getInt(NUM_COLUMN_GOOGLE) == 0
+                        || db.getInt(NUM_COLUMN_VK) == 0) {
                     Toast.makeText(getContext(),
-                            "Нельзя изменить пароль при входе через социальные сети.",
+                            R.string.can_not_change_password,
                             Toast.LENGTH_SHORT).show();
                     return false;
                 }
@@ -432,21 +501,21 @@ public class FragmentSettings extends PreferenceFragmentCompat
                 final EditText input2 = textEntryView.findViewById(R.id.et_password2);
                 final EditText input3 = textEntryView.findViewById(R.id.et_password3);
 
-                builder.setTitle("Смена пароля");
+                builder.setTitle(R.string.change_password);
                 builder.setView(textEntryView);
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, int arg1) {
                         if (input1.getText() == null || input1.getText().toString().isEmpty()
                                 || input2.getText() == null || input2.getText().toString().isEmpty()
                                 || input3.getText() == null || input3.getText().toString().isEmpty()) {
-                            Toast.makeText(getContext(), "Вы ввели пустой пароль",
+                            Toast.makeText(getContext(), R.string.void_pass,
                                     Toast.LENGTH_SHORT).show();
                             dialog.cancel();
                             return;
                         }
 
                         if (!input2.getText().toString().equals(input3.getText().toString())) {
-                            Toast.makeText(getContext(), "Пароли не совпадают",
+                            Toast.makeText(getContext(), R.string.passwords_not_correct,
                                     Toast.LENGTH_SHORT).show();
                             dialog.cancel();
                             return;
@@ -457,7 +526,7 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                 .addConverterFactory(ScalarsConverterFactory.create())
                                 .build();
                         UserService userService = retrofit.create(UserService.class);
-                        userService.changePassword(Person.id, User.md5(input1.getText().toString())
+                        userService.changePassword(Person.uId, User.md5(input1.getText().toString())
                                 , User.md5(input2.getText().toString()))
                                 .enqueue(new Callback<String>() {
                                     @Override
@@ -465,13 +534,13 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                                            @NonNull Response<String> response) {
                                         String r = response.body();
                                         if (Objects.requireNonNull(r).equals("0"))
-                                            Toast.makeText(getContext(), "Произошла ошибка на сервере!",
+                                            Toast.makeText(getContext(), R.string.error_on_server,
                                                     Toast.LENGTH_SHORT).show();
                                         else if (r.equals("2")) {
-                                            Toast.makeText(getContext(), "Неправильный пароль!",
+                                            Toast.makeText(getContext(), R.string.wrong_password,
                                                     Toast.LENGTH_SHORT).show();
                                         } else if (r.equals("1")) {
-                                            Toast.makeText(getContext(), "Пароль изменен!",
+                                            Toast.makeText(getContext(), R.string.changed_pass,
                                                     Toast.LENGTH_SHORT).show();
                                             dialog.cancel();
                                         }
@@ -484,7 +553,7 @@ public class FragmentSettings extends PreferenceFragmentCompat
                                 });
                     }
                 });
-                builder.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
@@ -497,6 +566,18 @@ public class FragmentSettings extends PreferenceFragmentCompat
                 params.setMargins(24, 24, 24, 24);
 
                 return false;
+            }
+        });
+
+        Preference imagePreference = findPreference("imageLeaders");
+        imagePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+
+        {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (newValue.equals(true)) db.putInt(COLUMN_IMAGE_LEADERS, 1);
+                else if (newValue.equals(false)) db.putInt(COLUMN_IMAGE_LEADERS, 0);
+                return true;
             }
         });
 
@@ -517,7 +598,17 @@ public class FragmentSettings extends PreferenceFragmentCompat
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Toast.makeText(getContext(), "Связь потеряна", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), R.string.lost_connection, Toast.LENGTH_SHORT).show();
+    }
+
+    public void saveAll() {
+        db.putString(COLUMN_NAME, Person.name);
+        db.putString(COLUMN_UID, Person.uId);
+        db.putString(COLUMN_LEVEL, Person.currentLevel);
+        db.putInt(COLUMN_EXPERIENCE, Person.experience);
+        db.putInt(COLUMN_LEVEL_EXPERIENCE, Person.currentLevelExperience);
+        db.putInt(COLUMN_LEADERBOARDPLACE, Person.leaderBoardPlace);
+        db.putString(COLUMN_C, Person.c);
     }
 
 }

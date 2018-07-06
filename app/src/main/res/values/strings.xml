@@ -52,8 +52,8 @@
     <string name="success">И добиться успеха</string>
     <string name="begin">Начните, чтобы</string>
     <string name="social">vk</string>
-    <string name="facebook_app_id">227878137947449</string>
-    <string name="fb_login_protocol_scheme">fb227878137947449</string>
+    <string name="facebook_app_id">1059877860841352</string>
+    <string name="fb_login_protocol_scheme">fb1059877860841352</string>
     <string name="server_client_id">1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com</string>
     <string name="task_1">Задание 1</string>
     <string name="choose">Какое-то там задание на выбор ванианта ответа</string>
@@ -78,6 +78,89 @@
     <string name="definitions">Термины</string>
     <string name="achievements">Достижения</string>
     <string name="theorem">теорема</string>
+    <string name="friends">Друзья</string>
+    <string name="no_courses">Для вас нет доступных курсов</string>
+    <string name="achievement_done">Ты выполнил достижение! +</string>
+    <string name="xp">xp</string>
+    <string name="param_courses">courses</string>
+    <string name="can_not_send_data">Не удалось отправить данные на сервер</string>
+    <string name="error_signin_facebook">Произошла ошибка при попытке входа через Facebook</string>
+    <string name="fill_in">Заполните поле</string>
+    <string name="too_short_password">Пароль не может быть меньше 6 символов!</string>
+    <string name="loading">Загрузка...</string>
+    <string name="error">Произошла ошибка!</string>
+    <string name="person_not_found">Такого пользователя не существует!</string>
+    <string name="wrong_password">Неверный пароль!</string>
+    <string name="welcome1">Добро пожаловать,</string>
+    <string name="welcome2">Добро пожаловать!</string>
+    <string name="error_signin_vk">Произошла ошибка при входе через VK</string>
+    <string name="can_not_load_image">Не удалось загрузить картинку!</string>
+    <string name="error_signin_google">Произошла ошибка при входе через Google</string>
+    <string name="lost_connection">Связь потеряна</string>
+    <string name="passwords_incorrect">Пароли не совпадают</string>
+    <string name="email_is_busy">Пользователь с таким email уже зарегестрирован!</string>
+    <string name="add_courses">Добавь курсы: 4</string>
+    <string name="do_tests">Пройди тесты: 2</string>
+    <string name="do_tests_dumb">Пройди тесты в тренажере: 5</string>
+    <string name="get_xp">Набери опыт: 50</string>
+    <string name="share_app">Поделись приложением</string>
+    <string name="wrong_theme">Такой темы не существует.</string>
+    <string name="add_course">Добавьте курс</string>
+    <string name="deleting_course">Удаление курса</string>
+    <string name="delete_course">Вы точно хотите удалить данный курс?</string>
+    <string name="yes">Да</string>
+    <string name="cancel">Отмена</string>
+    <string name="on">Включен</string>
+    <string name="basic_geom_knowledwes">Начальные геометрические сведения</string>
+    <string name="triangles">Треугольники</string>
+    <string name="parallel_straights">Параллельные прямые</string>
+    <string name="beetween">Соотношения между сторонами и углами треугольника</string>
+    <string name="many_angles">Многоугольники</string>
+    <string name="square">Площадь</string>
+    <string name="same_triangles">Подобие треугольников</string>
+    <string name="ring">Окружность</string>
+    <string name="search_of_definitions">Поиск определений</string>
+    <string name="tests_not_available">Тесты по данной теме закончились или недоступны</string>
+    <string name="ok">ОК</string>
+    <string name="correct_answer">Правильный ответ :</string>
+    <string name="correct_answers">Правильные ответы :</string>
+    <string name="can_not_send_name">Не удалось отправить имя на сервер</string>
+    <string name="off">Выключен</string>
+    <string name="auto">Авто</string>
+    <string name="share">Поделиться</string>
+    <string name="download_app">Скачай приложение GeomHelper! Оно поможет тебе в изучении геометрии по школьной программе!</string>
+    <string name="whats_new">Добавлен стартовый экран.\n
+                        Добавлена возможность входа через социальные сети.\n
+                        Добавлены тесты, а также переписан полностью сервер.\n
+                        Добавлено множество анимаций.\n
+                        Добавлена возможность смены email и пароля.\n
+                        Обновлены разделы в настройках.\n</string>
+    <string name="app_done">Проект написан Ильей Майером и Мирославой Чобитько.</string>
+    <string name="about_authors">Об авторах</string>
+    <string name="about">О приложении</string>
+    <string name="about_app">У многих школьников возникают проблемы с изучением такого непростого предмета, как геометрия.\n
+                        \n
+                        Идея нашего проекта заключается в создании простого в понимании интерактивного учебника с разнообразными тестами и заданиями, который поможет решить эту проблему. \n
+                        \n
+                        Так же мы хотим реализовать турнирную таблицу, чтобы каждый пользователь мог наблюдать не только за своими успехами, но и за успехами других людей.\n
+               </string>
+    <string name="exit">Выход из аккаунта</string>
+    <string name="are_you_sure">Вы действительно хотите выйти из аккаунта?</string>
+    <string name="no">Нет</string>
+    <string name="can_not_change_email">Нельзя изменить Email при входе через социальные сети.</string>
+    <string name="change_email">Смена Email</string>
+    <string name="void_email">Вы ввели пустой Email</string>
+    <string name="error_on_server">Произошла ошибка на сервере!</string>
+    <string name="this_email_is_busy">Данный Email уже занят.</string>
+    <string name="changed_email">Email изменен!</string>
+    <string name="can_not_change_password">Нельзя изменить пароль при входе через социальные сети.</string>
+    <string name="change_password">Смена пароля</string>
+    <string name="void_pass">Вы ввели пустой пароль</string>
+    <string name="passwords_not_correct">Пароли не совпадают</string>
+    <string name="changed_pass">Пароль изменен!</string>
+    <string name="you_havent_pass_tests">Вы еще не прошли ни одного теста</string>
+    <string name="search_theorems">Поиск теорем</string>
+    <string name="do_sth">Ты уже давно не занимался!</string>
     <integer name="com_vk_sdk_AppId">6314062</integer>
 
 </resources>

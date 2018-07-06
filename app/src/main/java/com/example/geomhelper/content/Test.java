@@ -5,14 +5,12 @@ public class Test {
     private String testName;
     private int numberOfThemes;
     private String[] themes;
-    private int courseExperience;
     private int background;
 
-    Test(String testName, int numberOfThemes, String[] themes, int courseExperience, int background) {
+    Test(String testName, int numberOfThemes, String[] themes, int background) {
         this.testName = testName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;
-        this.courseExperience = courseExperience;
         this.background = background;
     }
 
@@ -38,14 +36,6 @@ public class Test {
 
     public void setThemes(String theme, int i) {
         this.themes[i] = theme;
-    }
-
-    public int getCourseExperience() {
-        return courseExperience;
-    }
-
-    public void setCourseExperience(int courseExperience) {
-        this.courseExperience = courseExperience;
     }
 
     public int getBackground() {

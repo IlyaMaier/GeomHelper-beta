@@ -16,36 +16,34 @@ import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.content.Achievement;
 import com.example.geomhelper.content.Achievements;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_ACHIEVEMENTS;
 
 public class FragmentAchievements extends Fragment {
 
     public FragmentAchievements() {
     }
 
-    View view;
-    RecyclerView recyclerView;
-    RVAdapter rvAdapter;
-    List<Achievement> achievements;
     public static int coursesE = 10, testsE = 20, fabsE = 30, xpE = 40, sharedE = 50;
     public static int courses = 4, tests = 2, fabs = 5, xp = 50, shared = 1;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_fragment_achievements, container, false);
+        View view = inflater.inflate(R.layout.fragment_fragment_achievements, container, false);
 
-        Achievements achievs = new Gson().fromJson(
-                pref.getString("achievements", ""), Achievements.class);
+        DB db = new DB(getContext());
+        Achievements achievs = new Gson().fromJson(db.getString(
+                NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
         if (achievs == null)
             achievs = new Achievements();
 
-        int coursesM = 0, testsM = 0, fabsM = 0, xpM = 0, sharedM = 0;
+        int coursesM, testsM, fabsM, xpM, sharedM;
         if (achievs.isCoursesB()) coursesM = courses;
         else coursesM = achievs.getCourses();
         if (achievs.isTestsB()) testsM = tests;
@@ -57,20 +55,20 @@ public class FragmentAchievements extends Fragment {
         if (achievs.isSharedB()) sharedM = shared;
         else sharedM = achievs.getShared();
 
-        achievements = new ArrayList<>();
+        List<Achievement> achievements = new ArrayList<>();
         achievements.add(new Achievement(R.drawable.courses, coursesM,
-                4, "Добавь курсы: 4", "10 xp"));
+                4, getString(R.string.add_courses), "10 xp"));
         achievements.add(new Achievement(R.drawable.tests, testsM,
-                2, "Пройди тесты: 2", "20 xp"));
+                2, getString(R.string.do_tests), "20 xp"));
         achievements.add(new Achievement(R.drawable.dumb, fabsM,
-                5, "Пройди тесты в тренажере: 5", "30 xp"));
+                5, getString(R.string.do_tests_dumb), "30 xp"));
         achievements.add(new Achievement(R.drawable.tests, xpM, 50,
-                "Набери опыт: 50", "40 xp"));
+                getString(R.string.get_xp), "40 xp"));
         achievements.add(new Achievement(android.R.drawable.ic_menu_share, sharedM,
-                1, "Поделись приложением", "50 xp"));
+                1, getString(R.string.share_app), "50 xp"));
 
-        recyclerView = view.findViewById(R.id.rv_achiev);
-        rvAdapter = new RVAdapter();
+        RecyclerView recyclerView = view.findViewById(R.id.rv_achiev);
+        RVAdapter rvAdapter = new RVAdapter();
         rvAdapter.setAchievements(achievements);
         recyclerView.setAdapter(rvAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -86,7 +84,7 @@ public class FragmentAchievements extends Fragment {
             this.achievements = achievements;
         }
 
-        public RVAdapter() {
+        RVAdapter() {
         }
 
         @NonNull
@@ -121,7 +119,7 @@ public class FragmentAchievements extends Fragment {
             ImageView img;
             ProgressBar progressBar;
 
-            public AchievHolder(View itemView) {
+            AchievHolder(View itemView) {
                 super(itemView);
 
                 name = itemView.findViewById(R.id.text_achiev1);

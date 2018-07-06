@@ -7,16 +7,18 @@ import java.util.Map;
 
 public class TestJSON {
 
-    Map<Integer, Map<Integer, Integer>> tests;
+    private Map<Integer, Map<Integer, Integer>> tests;
 
     @SuppressLint("UseSparseArrays")
     public TestJSON() {
         tests = new HashMap<>();
     }
 
+    @SuppressLint("UseSparseArrays")
     public void setTest(int test, int theme, int stage) {
-        @SuppressLint("UseSparseArrays")
-        Map<Integer, Integer> arr = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> arr = tests.get(test);
+        if (arr == null)
+            arr = new HashMap<>();
         arr.put(theme, stage);
         tests.put(test, arr);
     }

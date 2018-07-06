@@ -2,20 +2,18 @@ package com.example.geomhelper.content;
 
 public class FirstTask {
 
-    String textViewName1, textViewTask1, radioButton, radioButton1, radioButton2;
-    int imageView1, correctAnswer, experience;
+    private String textViewName1, textViewTask1, radioButton, radioButton1, radioButton2;
+    private int imageView1, correctAnswer;
 
-    public FirstTask(String textViewTask1, int imageView1,
-                     String radioButton, String radioButton1,
-                     String radioButton2, int correctAnswer, int experience) {
+    FirstTask(String textViewTask1, int imageView1,
+              String radioButton, String radioButton1,
+              String radioButton2, int correctAnswer) {
         this.textViewTask1 = textViewTask1;
         this.imageView1 = imageView1;
         this.radioButton = radioButton;
         this.radioButton1 = radioButton1;
         this.radioButton2 = radioButton2;
         this.correctAnswer = correctAnswer;
-        this.experience = experience;
-
     }
 
     public String getTextViewName1() {
@@ -74,11 +72,4 @@ public class FirstTask {
         this.correctAnswer = correctAnswer;
     }
 
-    public int getExperience() {
-        return experience;
-    }
-
-    public void setExperience(int experience) {
-        this.experience = experience;
-    }
 }

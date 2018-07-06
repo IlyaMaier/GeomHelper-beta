@@ -33,6 +33,7 @@ import com.example.geomhelper.content.ThirdTasks;
 import com.example.geomhelper.retrofit.TestJSON;
 import com.example.geomhelper.retrofit.User;
 import com.example.geomhelper.retrofit.UserService;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -45,18 +46,21 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-import static com.example.geomhelper.Person.pref;
 import static com.example.geomhelper.Person.task;
 import static com.example.geomhelper.fragments.FragmentTests.fab;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.COLUMN_TESTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_ACHIEVEMENTS;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_TESTS;
 
 public class FragmentResult extends Fragment {
 
     private FirstTask firstTask;
     private SecondTask secondTask;
     private ThirdTask thirdTask;
-    static int answer1 = -1;
-    static String answer2 = "";
-    static String[] answers3 = new String[3];
+    public static int answer1 = -1;
+    public static String answer2 = "";
+    public static String[] answers3 = new String[3];
     private int xp;
 
     public FragmentResult() {
@@ -66,6 +70,8 @@ public class FragmentResult extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_result, container, false);
+
+        DB db = new DB(getContext());
 
         initializeTests();
 
@@ -83,13 +89,13 @@ public class FragmentResult extends Fragment {
         textView.setText("3");
 
         textView = card1.findViewById(R.id.text_answer);
-        StringBuilder answer = new StringBuilder("Правильный ответ : " + firstTask.getCorrectAnswer());
+        StringBuilder answer = new StringBuilder(getString(R.string.correct_answer) + firstTask.getCorrectAnswer());
         textView.setText(answer.toString());
         textView = card2.findViewById(R.id.text_answer);
-        answer = new StringBuilder("Правильный ответ : " + secondTask.getAnswer());
+        answer = new StringBuilder(getString(R.string.correct_answer) + secondTask.getAnswer());
         textView.setText(answer.toString());
         textView = card3.findViewById(R.id.text_answer);
-        answer = new StringBuilder("Правильные ответы : ");
+        answer = new StringBuilder(getString(R.string.correct_answers));
         for (int i = 0; i < thirdTask.getAnswer().length; i++)
             answer.append(thirdTask.getAnswer()[i]).append(", ");
         answer.replace(answer.length() - 2, answer.length() - 1, " ");
@@ -161,7 +167,9 @@ public class FragmentResult extends Fragment {
 
         if (xp > 0 && !fab) {
             Achievements achievements = new Gson().fromJson(
-                    pref.getString("achievements", ""), Achievements.class);
+                    db.getString(NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
+            if (achievements == null)
+                achievements = new Achievements();
             achievements.setTests(achievements.getTests() + 1);
 
             if (achievements.getTests() >= FragmentAchievements.tests
@@ -173,8 +181,8 @@ public class FragmentResult extends Fragment {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "0")
                         .setSmallIcon(R.drawable.ic_menu_leaderboard)
                         .setColor(getResources().getColor(R.color.leaderboard))
-                        .setContentTitle("GeomHelper")
-                        .setContentText("Ты выполнил достижение! + " +
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(getString(R.string.achievement_done) +
                                 FragmentAchievements.testsE + "xp")
                         .setAutoCancel(true)
                         .setWhen(System.currentTimeMillis())
@@ -182,11 +190,11 @@ public class FragmentResult extends Fragment {
                 Notification notification = builder.build();
                 Objects.requireNonNull(notificationManager).notify(0, notification);
             }
-            pref.edit().putString("achievements", new Gson().toJson(
-                    achievements, Achievements.class)).apply();
+            db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(
+                    achievements, Achievements.class));
         } else if (xp > 0) {
             Achievements achievements = new Gson().fromJson(
-                    pref.getString("achievements", ""), Achievements.class);
+                    db.getString(NUM_COLUMN_ACHIEVEMENTS), Achievements.class);
             if (achievements == null) achievements = new Achievements();
             achievements.setFabs(achievements.getFabs() + 1);
 
@@ -199,8 +207,8 @@ public class FragmentResult extends Fragment {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "0")
                         .setSmallIcon(R.drawable.ic_menu_leaderboard)
                         .setColor(getResources().getColor(R.color.leaderboard))
-                        .setContentTitle("GeomHelper")
-                        .setContentText("Ты выполнил достижение! + " +
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(getString(R.string.achievement_done) +
                                 FragmentAchievements.fabsE + "xp")
                         .setAutoCancel(true)
                         .setWhen(System.currentTimeMillis())
@@ -208,8 +216,8 @@ public class FragmentResult extends Fragment {
                 Notification notification = builder.build();
                 Objects.requireNonNull(notificationManager).notify(0, notification);
             }
-            pref.edit().putString("achievements", new Gson().toJson(
-                    achievements, Achievements.class)).apply();
+            db.putString(COLUMN_ACHIEVEMENTS, new Gson().toJson(
+                    achievements, Achievements.class));
         }
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -219,7 +227,7 @@ public class FragmentResult extends Fragment {
 
         try {
             UserService userService = retrofit.create(UserService.class);
-            userService.updateUser(Person.id, "experience", String.valueOf(Person.experience))
+            userService.updateUser(Person.uId, "experience", String.valueOf(Person.experience))
                     .enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -228,17 +236,21 @@ public class FragmentResult extends Fragment {
 
                         @Override
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Toast.makeText(getContext(),
-                                    "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+                            try {
+                                Toast.makeText(getContext(),
+                                        R.string.can_not_send_data, Toast.LENGTH_SHORT).show();
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
-            userService.updateUser(Person.id, "achievements",
-                    pref.getString("achievements", ""))
+            userService.updateUser(Person.uId, "achievements",
+                    db.getString(NUM_COLUMN_ACHIEVEMENTS))
                     .enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             if (Objects.requireNonNull(response.body()).equals("0"))
-                                Toast.makeText(getContext(), "Не удалось отправить данные на сервер",
+                                Toast.makeText(getContext(), R.string.can_not_send_data,
                                         Toast.LENGTH_SHORT).show();
                         }
 
@@ -246,7 +258,7 @@ public class FragmentResult extends Fragment {
                         public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                             try {
                                 Toast.makeText(getContext(),
-                                        "Не удалось отправить данные на сервер",
+                                        R.string.can_not_send_data,
                                         Toast.LENGTH_SHORT).show();
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -254,20 +266,24 @@ public class FragmentResult extends Fragment {
                         }
                     });
         } catch (NullPointerException e) {
-            Toast.makeText(getContext(),
-                    "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+            try {
+                Toast.makeText(getContext(),
+                        R.string.can_not_send_data,
+                        Toast.LENGTH_SHORT).show();
+            } catch (Exception e1) {
+                e.printStackTrace();
+            }
         }
 
         if (xp > 0 && !fab) {
             TestJSON testJSON = new Gson().fromJson(
-                    pref.getString("tests", null), TestJSON.class);
+                    db.getString(NUM_COLUMN_TESTS), TestJSON.class);
             if (testJSON == null) testJSON = new TestJSON();
             testJSON.setTest(Person.currentTest, Person.currentTestTheme, task + 1);
-            pref.edit().putString("tests", new Gson().toJson(testJSON, TestJSON.class)).apply();
+            db.putString(COLUMN_TESTS, new Gson().toJson(testJSON, TestJSON.class));
             try {
                 UserService userService = retrofit.create(UserService.class);
-                userService.updateUser(Person.id, "tests", new Gson().toJson(testJSON, TestJSON.class))
+                userService.updateUser(Person.uId, "tests", new Gson().toJson(testJSON, TestJSON.class))
                         .enqueue(new Callback<String>() {
                             @Override
                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -276,14 +292,23 @@ public class FragmentResult extends Fragment {
 
                             @Override
                             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                Toast.makeText(getContext(),
-                                        "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
+                                try {
+                                    Toast.makeText(getContext(),
+                                            R.string.can_not_send_data,
+                                            Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         });
             } catch (NullPointerException e) {
-                Toast.makeText(getContext(),
-                        "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
+                try {
+                    Toast.makeText(getContext(),
+                            R.string.can_not_send_data,
+                            Toast.LENGTH_SHORT).show();
+                } catch (Exception e1) {
+                    e.printStackTrace();
+                }
             }
         }
 

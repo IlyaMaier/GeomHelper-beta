@@ -6,11 +6,11 @@ public class ThirdTask {
     private String[] answer;
 
     ThirdTask(String textViewT31, String textViewT32,
-                     String textViewT33, int imThirdTask, String[] answer) {
+              String textViewT33, int imgThirdTask, String[] answer) {
         this.textViewT31 = textViewT31;
         this.textViewT32 = textViewT32;
         this.textViewT33 = textViewT33;
-        this.imgThirdTask = imThirdTask;
+        this.imgThirdTask = imgThirdTask;
         this.answer = answer;
     }
 

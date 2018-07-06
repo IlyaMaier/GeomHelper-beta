@@ -35,7 +35,7 @@ public class FragmentSecondTask extends Fragment {
     private EditText editText2Task;
     private Button buttonEnter2;
     private SecondTask secondTask;
-    static int fabTest = 0, fabTheme = 0, fabStage = 0;
+    public static int fabTest = 0, fabTheme = 0, fabStage = 0;
 
     @Nullable
     @Override

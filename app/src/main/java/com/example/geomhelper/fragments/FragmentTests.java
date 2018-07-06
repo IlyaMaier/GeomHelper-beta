@@ -27,30 +27,27 @@ import com.example.geomhelper.activities.MainActivity;
 import com.example.geomhelper.content.Test;
 import com.example.geomhelper.content.Tests;
 import com.example.geomhelper.retrofit.TestJSON;
+import com.example.geomhelper.sqlite.DB;
 import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.example.geomhelper.Person.pref;
+import static com.example.geomhelper.sqlite.OpenHelper.NUM_COLUMN_TESTS;
 
 public class FragmentTests extends Fragment {
 
     public FragmentTests() {
     }
 
-    static boolean fab = false;
-    RecyclerView recyclerView;
-    FragmentManager fragmentManager;
-    RVAdpater rvTestsAdapter;
-    LinearLayoutManager verticalManager, horizontalManager;
-    BottomNavigationView bottomNavigationView;
-    List<Test> currentTests;
-    FloatingActionButton floatingActionButton;
-    private int scrollDist = 0;
-    private boolean isVisible = true, j = true;
-    private float MINIMUM = 25;
+    public static boolean fab = false;
+    private RecyclerView recyclerView;
+    private FragmentManager fragmentManager;
+    private RVAdpater rvTestsAdapter;
+    private LinearLayoutManager verticalManager, horizontalManager;
+    private List<Test> currentTests;
+    private FloatingActionButton floatingActionButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -73,7 +70,7 @@ public class FragmentTests extends Fragment {
         recyclerView.setAdapter(rvTestsAdapter);
         recyclerView.scrollToPosition(currentTests.size() - 1);
 
-        bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
@@ -90,10 +87,12 @@ public class FragmentTests extends Fragment {
             public void onClick(View v) {
                 Random r = new Random();
 
+                DB db = new DB(getContext());
+
                 TestJSON testJSON = new Gson().fromJson(
-                        pref.getString("tests", null), TestJSON.class);
+                        db.getString(NUM_COLUMN_TESTS), TestJSON.class);
                 if (testJSON == null) {
-                    Toast.makeText(getContext(), "Вы еще не прошли ни одного теста",
+                    Toast.makeText(getContext(), R.string.you_havent_pass_tests,
                             Toast.LENGTH_SHORT).show();
                 } else {
                     fab = true;
@@ -133,38 +132,6 @@ public class FragmentTests extends Fragment {
             }
         });
 
-//        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                if (isVisible && scrollDist > MINIMUM) {
-//                    hide();
-//                    scrollDist = 0;
-//                    isVisible = false;
-//                } else if (!isVisible && scrollDist < -MINIMUM) {
-//                    show();
-//                    scrollDist = 0;
-//                    isVisible = true;
-//                }
-//
-//                if ((isVisible && dy > 0) || (!isVisible && dy < 0)) {
-//                    scrollDist += dy;
-//                }
-//
-//            }
-//
-//            void show() {
-//                floatingActionButton.animate().translationY(0)
-//                        .setInterpolator(new DecelerateInterpolator(2)).start();
-//            }
-//
-//            void hide() {
-//                floatingActionButton.animate().translationY(
-//                        floatingActionButton.getHeight() + 30).
-//                        setInterpolator(new AccelerateInterpolator(2)).start();
-//            }
-//
-//        });
         return rootView;
     }
 

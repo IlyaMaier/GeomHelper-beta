@@ -47,7 +47,7 @@
                 android:textSize="30sp" />
 
             <TextView
-                android:id="@+id/text_expierence_leaderboard"
+                android:id="@+id/text_experience_leaderboard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp" />

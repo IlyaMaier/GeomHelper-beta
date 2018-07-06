@@ -23,17 +23,15 @@ public class FragmentThemes extends Fragment {
     public FragmentThemes() {
     }
 
-    Resources resources = new Resources();
-    Button[] button;
-    LinearLayout linearLayout;
+    private Resources resources = new Resources();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_themes, container, false);
 
-        linearLayout = view.findViewById(R.id.linearLayoutFragmentThemes);
-        button = new Button[Person.currentCourse.getNumberOfThemes()];
+        LinearLayout linearLayout = view.findViewById(R.id.linearLayoutFragmentThemes);
+        Button[] button = new Button[Person.currentCourse.getNumberOfThemes()];
 
         for (int i = 0; i < button.length; i++) {
             button[i] = new Button(getContext());

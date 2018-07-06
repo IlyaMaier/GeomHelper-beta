@@ -20,27 +20,22 @@ public class Tests {
     private String[] basicsThemes = {"Прямая и отрезок",
             "Луч и угол",
             "Сравнение отрезков и углов",
-            "Измерение отрезков",
-            "Измерение углов",
+            "Измерение отрезков и углов",
             "Перпендикулярные прямые"};
-    private int basicsExperience = 95;
-    public Test basics = new Test("Начальные геометрические сведения",
-            6,
+    private Test basics = new Test("Начальные геометрические сведения",
+            5,
             basicsThemes,
-            basicsExperience,
             R.drawable.background_test_1);
     // end basics
 
     // Second
     private String[] secondThemes = {"Первый признак равенства треугольников",
             "Медианы, биссектрисы и высоты треугольника",
-            "Второй и третий признаки равенства треугольников",
-            "Задачи на построение"};
-    private int secondExperience = 150;
-    public Test second = new Test("Треугольники",
+            "Второй признак равенства треугольников",
+            "Третий признак равенства треугольников"};
+    private Test second = new Test("Треугольники",
             4,
             secondThemes,
-            secondExperience,
             R.drawable.background_test_2);
     // end second
 
@@ -48,11 +43,9 @@ public class Tests {
     private String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private int thirdExperience = 100;
-    public Test third = new Test("Параллельные прямые",
+    private Test third = new Test("Параллельные прямые",
             3,
             thirdThemes,
-            thirdExperience,
             R.drawable.background_test_3);
     // end third
 
@@ -61,11 +54,9 @@ public class Tests {
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private int fourthExperience = 160;
-    public Test fourth = new Test("Соотношения между сторонами и углами ▲",
+    private Test fourth = new Test("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
-            fourthExperience,
             R.drawable.background_test_4);
     // end fourth
 
