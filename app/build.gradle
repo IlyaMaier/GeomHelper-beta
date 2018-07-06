@@ -3,7 +3,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.geomhelper"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "beta 2.1"
@@ -23,6 +23,20 @@ android {
         }
     }
     buildToolsVersion '27.0.3'
+
+    // https://stackoverflow.com/questions/44342455/more-than-one-file-was-found-with-os-independent-path-meta-inf-license
+    // without this i got a error message
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
+
 }
 
 dependencies {
@@ -31,7 +45,6 @@ dependencies {
     implementation 'org.springframework.android:spring-android-rest-template:2.0.0.M3'
     implementation 'com.takisoft.fix:preference-v7:27.0.0.0'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
     implementation 'com.facebook.android:facebook-android-sdk:4.34.0'
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
@@ -52,8 +65,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
-    implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
-    implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
+
+    //https://stackoverflow.com/questions/46094281/install-failed-no-matching-abis-error-on-android-8
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

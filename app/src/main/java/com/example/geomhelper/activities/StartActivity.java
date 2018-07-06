@@ -33,6 +33,8 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         try {
+            //зачем ты оборачиваешь потенциальный код на NPE в requireNonNull
+            // чтобы не ругалась IDE? Ты посмотри что за код в этом методе? Шило на мыло
             Objects.requireNonNull(getSupportActionBar()).hide();
         } catch (NullPointerException e) {
             e.printStackTrace();
