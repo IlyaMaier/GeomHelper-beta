@@ -161,6 +161,7 @@
     <string name="you_havent_pass_tests">Вы еще не прошли ни одного теста</string>
     <string name="search_theorems">Поиск теорем</string>
     <string name="do_sth">Ты уже давно не занимался!</string>
+    <string name="remember_me">Запомнить меня</string>
     <integer name="com_vk_sdk_AppId">6314062</integer>
 
 </resources>

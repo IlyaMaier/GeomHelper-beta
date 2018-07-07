@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,6 +86,7 @@ public class LoginActivity extends AppCompatActivity
     private ProgressDialog progressDialog;
 
     public static final int CODE_REQUEST = 1234;
+    public static final String PREF_MAIL = "mail";
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -111,6 +113,9 @@ public class LoginActivity extends AppCompatActivity
                 finish();
             }
         });
+
+        mEmail.setText(getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE)
+                .getString(PREF_MAIL, ""));
 
         //buttons
         findViewById(R.id.sign_in).setOnClickListener(this);
@@ -193,9 +198,17 @@ public class LoginActivity extends AppCompatActivity
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+        CheckBox checkBox = findViewById(R.id.checkbox_login);
+        if (checkBox.isChecked())
+            getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE)
+                    .edit().putString(PREF_MAIL, mEmail.getText().toString()).apply();
+
         switch (v.getId()) {
             case R.id.sign_in:
-                signIn();
+                if (validateForm())
+                    signIn();
+                else return;
                 break;
             case R.id.vk:
                 signInWithVK();
@@ -210,74 +223,72 @@ public class LoginActivity extends AppCompatActivity
         progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setTitle(getString(R.string.loading));
         progressDialog.show();
+
     }
 
     void signIn() {
-        if (validateForm()) {
-            userService.login(mEmail.getText().toString(),
-                    User.md5(mPassword.getText().toString()))
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            switch (Objects.requireNonNull(response.body())) {
-                                case "0":
-                                    Toast.makeText(getApplicationContext(), R.string.error,
-                                            Toast.LENGTH_SHORT).show();
-                                    progressDialog.cancel();
-                                    break;
-                                case "2":
-                                    Toast.makeText(getApplicationContext(),
-                                            R.string.person_not_found,
-                                            Toast.LENGTH_SHORT).show();
-                                    progressDialog.cancel();
-                                    break;
-                                case "3":
-                                    Toast.makeText(getApplicationContext(), R.string.wrong_password,
-                                            Toast.LENGTH_SHORT).show();
-                                    progressDialog.cancel();
-                                    break;
-                                default:
-                                    User user = new Gson().fromJson(response.body(), User.class);
-                                    Person.uId = String.valueOf(user.getId());
-                                    Person.name = user.getName();
-                                    Person.experience = user.getExperience();
-                                    Person.currentLevel = new Levels().getLevel(Person.experience);
-                                    Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
-                                    Person.c = user.getCourses();
-                                    tests = user.getTests();
-                                    achievements = user.getAchievements();
+        userService.login(mEmail.getText().toString(),
+                User.md5(mPassword.getText().toString()))
+                .enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        switch (Objects.requireNonNull(response.body())) {
+                            case "0":
+                                Toast.makeText(getApplicationContext(), R.string.error,
+                                        Toast.LENGTH_SHORT).show();
+                                progressDialog.cancel();
+                                break;
+                            case "2":
+                                Toast.makeText(getApplicationContext(),
+                                        R.string.person_not_found,
+                                        Toast.LENGTH_SHORT).show();
+                                progressDialog.cancel();
+                                break;
+                            case "3":
+                                Toast.makeText(getApplicationContext(), R.string.wrong_password,
+                                        Toast.LENGTH_SHORT).show();
+                                progressDialog.cancel();
+                                break;
+                            default:
+                                User user = new Gson().fromJson(response.body(), User.class);
+                                Person.uId = String.valueOf(user.getId());
+                                Person.name = user.getName();
+                                Person.experience = user.getExperience();
+                                Person.currentLevel = new Levels().getLevel(Person.experience);
+                                Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
+                                Person.c = user.getCourses();
+                                tests = user.getTests();
+                                achievements = user.getAchievements();
 
-                                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-                                    try {
-                                        StorageReference profileRef = mStorageRef.child(Person.uId);
-                                        File file = new File(getFilesDir(),
-                                                "profileImage.png");
-                                        profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception exception) {
-                                                Toast.makeText(getApplicationContext(),
-                                                        getString(R.string.can_not_send_data),
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                                StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                                try {
+                                    StorageReference profileRef = mStorageRef.child(Person.uId);
+                                    File file = new File(getFilesDir(),
+                                            "profileImage.png");
+                                    profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            Toast.makeText(getApplicationContext(),
+                                                    getString(R.string.can_not_send_data),
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
-                                    saveAndFinish();
-                                    break;
-                            }
+                                saveAndFinish();
+                                break;
                         }
+                    }
 
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            Toast.makeText(getApplicationContext(), getString(R.string.error),
-                                    Toast.LENGTH_SHORT).show();
-                            progressDialog.cancel();
-                        }
-                    });
-        }
-
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.error),
+                                Toast.LENGTH_SHORT).show();
+                        progressDialog.cancel();
+                    }
+                });
     }
 
     void saveAndFinish() {
