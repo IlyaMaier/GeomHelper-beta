@@ -1,43 +1,35 @@
 {
   "project_info": {
-    "project_number": "1021657095056",
-    "firebase_url": "https://geomhelper.firebaseio.com",
-    "project_id": "geomhelper",
-    "storage_bucket": "geomhelper.appspot.com"
+    "project_number": "434485314194",
+    "firebase_url": "https://geomhelper-202719.firebaseio.com",
+    "project_id": "geomhelper-202719",
+    "storage_bucket": "geomhelper-202719.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1021657095056:android:e0b7c266782a8fa4",
+        "mobilesdk_app_id": "1:434485314194:android:5725ab2af6da3c58",
         "android_client_info": {
-          "package_name": "com.example.geomhelper"
+          "package_name": "ru.project.geomhelper"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "1021657095056-hmeqr1olb3ebtqq2c8qgtddmpu4cqhet.apps.googleusercontent.com",
+          "client_id": "434485314194-bc5s1r2j2s2ncr1uiq3a01oj7tj939sl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.geomhelper",
-            "certificate_hash": "daba35c9014652db8f96d2781302f11e14791fbb"
+            "package_name": "ru.project.geomhelper",
+            "certificate_hash": "2a065336d0d9fb9147854e0820c7fc4f23aaf4d4"
           }
         },
         {
-          "client_id": "1021657095056-7p6djmpicsvroicqdiogsqjpqfbbj3vm.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "1021657095056-7p6djmpicsvroicqdiogsqjpqfbbj3vm.apps.googleusercontent.com",
+          "client_id": "434485314194-6cfrrc90arng5gbkrdjs68fgh89q85q8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCZDtc1926eys6JWO0qpW7zl9da7jtL5IE"
+          "current_key": "AIzaSyBUDkzx1SPh1xXbyw71r03_ixGpjCC9Nb8"
         }
       ],
       "services": {
@@ -48,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com",
+              "client_id": "434485314194-6cfrrc90arng5gbkrdjs68fgh89q85q8.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

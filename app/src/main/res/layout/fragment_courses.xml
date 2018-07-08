@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color"
-    tools:context="com.example.geomhelper.fragments.FragmentCourses">
+    tools:context="ru.project.geomhelper.fragments.FragmentCourses">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_courses"

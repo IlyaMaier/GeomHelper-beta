@@ -4,7 +4,7 @@
     android:id="@+id/frame_profile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.geomhelper.fragments.FragmentProfile">
+    tools:context="ru.project.geomhelper.fragments.FragmentProfile">
 
     <ScrollView
         android:id="@+id/scroll_profile"
@@ -17,7 +17,7 @@
             android:layout_margin="16dp"
             android:orientation="vertical">
 
-            <com.example.geomhelper.resources.CircleImageView
+            <ru.project.geomhelper.resources.CircleImageView
                 android:id="@+id/imageProfile"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
